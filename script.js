@@ -11,6 +11,8 @@ class BeatCountdownTimer {
         this.targetDurationMinutes = 30;
         this.remainingTimeSeconds = 0;
         this.timerInterval = null;
+        this.isHeartbeatMode = false;
+        this.beatFrequency = 1; // Default: every beat
         
         this.initializeElements();
         this.setupEventListeners();
@@ -30,6 +32,11 @@ class BeatCountdownTimer {
         this.requiredBpmDisplay = document.getElementById('requiredBpmDisplay');
         this.currentBpm = document.getElementById('currentBpm');
         this.beatIndicator = document.getElementById('beatIndicator');
+        this.heartbeatToggleBtn = document.getElementById('heartbeatToggleBtn');
+        this.freq1Btn = document.getElementById('freq1Btn');
+        this.freq2Btn = document.getElementById('freq2Btn');
+        this.freq3Btn = document.getElementById('freq3Btn');
+        this.freq4Btn = document.getElementById('freq4Btn');
         this.sliderTrack = document.getElementById('sliderTrack');
         this.sliderThumb = document.getElementById('sliderThumb');
         this.sliderFill = document.getElementById('sliderFill');
@@ -45,6 +52,13 @@ class BeatCountdownTimer {
         this.startBtn.addEventListener('click', () => this.startCountdown());
         this.stopBtn.addEventListener('click', () => this.toggleStopResume());
         this.resetBtn.addEventListener('click', () => this.resetCountdown());
+        this.heartbeatToggleBtn.addEventListener('click', () => this.toggleHeartbeatMode());
+        
+        // Beat frequency controls
+        this.freq1Btn.addEventListener('click', () => this.setBeatFrequency(1));
+        this.freq2Btn.addEventListener('click', () => this.setBeatFrequency(2));
+        this.freq3Btn.addEventListener('click', () => this.setBeatFrequency(3));
+        this.freq4Btn.addEventListener('click', () => this.setBeatFrequency(4));
         
         // Prevent non-numeric input for duration
         this.durationInput.addEventListener('input', (e) => {
@@ -296,6 +310,14 @@ class BeatCountdownTimer {
     playBassDrum() {
         if (!this.audioContext) return;
         
+        if (this.isHeartbeatMode) {
+            this.playHeartbeat();
+        } else {
+            this.playRegularKick();
+        }
+    }
+    
+    playRegularKick() {
         // Create a more realistic kick drum sound
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
@@ -324,6 +346,68 @@ class BeatCountdownTimer {
         // Start and stop the oscillator
         oscillator.start(this.audioContext.currentTime);
         oscillator.stop(this.audioContext.currentTime + 0.3);
+    }
+    
+    playHeartbeat() {
+        const volumeMultiplier = this.volume / 100;
+        const currentTime = this.audioContext.currentTime;
+        
+        // Calculate the beat interval in seconds
+        const beatInterval = 60 / this.bpm;
+        // Second beat occurs at 1/4 of the beat interval
+        const secondBeatDelay = beatInterval * 0.25;
+        
+        // Create the double beat heartbeat sound
+        // First beat (stronger)
+        const oscillator1 = this.audioContext.createOscillator();
+        const gainNode1 = this.audioContext.createGain();
+        const filter1 = this.audioContext.createBiquadFilter();
+        
+        oscillator1.connect(filter1);
+        filter1.connect(gainNode1);
+        gainNode1.connect(this.audioContext.destination);
+        
+        // Heartbeat character - lower frequency, softer attack
+        filter1.type = 'lowpass';
+        filter1.frequency.setValueAtTime(150, currentTime);
+        filter1.frequency.exponentialRampToValueAtTime(40, currentTime + 0.15);
+        
+        oscillator1.frequency.setValueAtTime(60, currentTime);
+        oscillator1.frequency.exponentialRampToValueAtTime(15, currentTime + 0.15);
+        
+        // Volume envelope for first beat
+        gainNode1.gain.setValueAtTime(0, currentTime);
+        gainNode1.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, currentTime + 0.02);
+        gainNode1.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.4);
+        
+        oscillator1.start(currentTime);
+        oscillator1.stop(currentTime + 0.4);
+        
+        // Second beat (softer, slightly higher pitch) - rhythmically aligned
+        setTimeout(() => {
+            const oscillator2 = this.audioContext.createOscillator();
+            const gainNode2 = this.audioContext.createGain();
+            const filter2 = this.audioContext.createBiquadFilter();
+            
+            oscillator2.connect(filter2);
+            filter2.connect(gainNode2);
+            gainNode2.connect(this.audioContext.destination);
+            
+            filter2.type = 'lowpass';
+            filter2.frequency.setValueAtTime(180, currentTime + secondBeatDelay);
+            filter2.frequency.exponentialRampToValueAtTime(50, currentTime + secondBeatDelay + 0.15);
+            
+            oscillator2.frequency.setValueAtTime(70, currentTime + secondBeatDelay);
+            oscillator2.frequency.exponentialRampToValueAtTime(20, currentTime + secondBeatDelay + 0.15);
+            
+            // Volume envelope for second beat (softer)
+            gainNode2.gain.setValueAtTime(0, currentTime + secondBeatDelay);
+            gainNode2.gain.linearRampToValueAtTime(volumeMultiplier * 0.5, currentTime + secondBeatDelay + 0.02);
+            gainNode2.gain.exponentialRampToValueAtTime(0.01, currentTime + secondBeatDelay + 0.35);
+            
+            oscillator2.start(currentTime + secondBeatDelay);
+            oscillator2.stop(currentTime + secondBeatDelay + 0.35);
+        }, secondBeatDelay * 1000); // Convert to milliseconds for setTimeout
     }
     
     startCountdown() {
@@ -382,8 +466,13 @@ class BeatCountdownTimer {
         
         this.interval = setInterval(() => {
             this.countdown--;
-            this.playBassDrum();
-            this.triggerBeatAnimation();
+            
+            // Only play sound and animation on beats that match the frequency
+            if (this.countdown % this.beatFrequency === 0) {
+                this.playBassDrum();
+                this.triggerBeatAnimation();
+            }
+            
             this.lastBeatTime = Date.now();
             
             if (this.countdown <= 0) {
@@ -394,9 +483,11 @@ class BeatCountdownTimer {
             }
         }, intervalMs);
         
-        // Play first beat immediately
-        this.playBassDrum();
-        this.triggerBeatAnimation();
+        // Play first beat immediately if it matches frequency
+        if (this.countdown % this.beatFrequency === 0) {
+            this.playBassDrum();
+            this.triggerBeatAnimation();
+        }
     }
     
     startCountdownTimer() {
@@ -415,6 +506,43 @@ class BeatCountdownTimer {
         const minutes = Math.floor(this.remainingTimeSeconds / 60);
         const seconds = this.remainingTimeSeconds % 60;
         this.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    toggleHeartbeatMode() {
+        this.isHeartbeatMode = !this.isHeartbeatMode;
+        
+        if (this.isHeartbeatMode) {
+            this.heartbeatToggleBtn.textContent = 'Regular Kick';
+            this.heartbeatToggleBtn.classList.add('active');
+        } else {
+            this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
+            this.heartbeatToggleBtn.classList.remove('active');
+        }
+    }
+    
+    setBeatFrequency(frequency) {
+        this.beatFrequency = frequency;
+        
+        // Update button states
+        this.freq1Btn.classList.remove('active');
+        this.freq2Btn.classList.remove('active');
+        this.freq3Btn.classList.remove('active');
+        this.freq4Btn.classList.remove('active');
+        
+        switch(frequency) {
+            case 1:
+                this.freq1Btn.classList.add('active');
+                break;
+            case 2:
+                this.freq2Btn.classList.add('active');
+                break;
+            case 3:
+                this.freq3Btn.classList.add('active');
+                break;
+            case 4:
+                this.freq4Btn.classList.add('active');
+                break;
+        }
     }
     
     toggleStopResume() {
@@ -464,9 +592,14 @@ class BeatCountdownTimer {
         this.countdown = this.originalCountdown;
         this.remainingTimeSeconds = this.targetDurationMinutes * 60;
         this.bpm = parseInt(this.initialBpmInput.value);
+        this.isHeartbeatMode = false;
+        this.beatFrequency = 1;
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
+        this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
+        this.heartbeatToggleBtn.classList.remove('active');
+        this.setBeatFrequency(1); // Reset to every beat
         this.showSetupPanel();
         // Reset button to Stop state
         this.stopBtn.textContent = 'Stop';

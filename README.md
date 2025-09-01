@@ -32,6 +32,8 @@ A rhythmic countdown timer that synchronizes beats with a countdown timer.
 - **Start**: Enter duration and initial BPM, then click "Start Timer"
 - **Stop/Resume**: Pause and resume the countdown
 - **Reset**: Return to the setup screen
+- **Heartbeat Mode**: Toggle between regular kick drum and heartbeat sound
+- **Beat Frequency**: Choose how often to hear beats (every count, every 2nd, 3rd, or 4th)
 - **BPM Slider**: Drag to adjust the beat timing
 - **Volume Slider**: Drag to adjust the sound volume
 

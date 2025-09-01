@@ -65,7 +65,7 @@ input[type="number"]:focus {
     box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
 }
 
-.start-btn, .stop-btn, .reset-btn, .resume-btn {
+.start-btn, .stop-btn, .reset-btn, .resume-btn, .heartbeat-btn {
     padding: 1rem 2rem;
     border: none;
     border-radius: 10px;
@@ -116,6 +116,69 @@ input[type="number"]:focus {
 .reset-btn:hover {
     background: #4a5568;
     transform: translateY(-2px);
+}
+
+.heartbeat-btn {
+    background: #e53e3e;
+    color: white;
+    border: 2px solid #e53e3e;
+}
+
+.heartbeat-btn:hover {
+    background: #c53030;
+    transform: translateY(-2px);
+}
+
+.heartbeat-btn.active {
+    background: #48bb78;
+    border-color: #48bb78;
+}
+
+.heartbeat-btn.active:hover {
+    background: #38a169;
+}
+
+.beat-frequency-controls {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.beat-frequency-controls label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 1rem;
+}
+
+.frequency-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.freq-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #4a5568;
+}
+
+.freq-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.freq-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
 }
 
 .countdown-display {
@@ -328,9 +391,19 @@ input[type="number"]:focus {
         align-items: center;
     }
     
-    .start-btn, .stop-btn, .reset-btn {
+    .start-btn, .stop-btn, .reset-btn, .heartbeat-btn {
         width: 100%;
         margin: 0.5rem 0;
+    }
+    
+    .frequency-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .freq-btn {
+        width: 100%;
+        margin: 0.25rem 0;
     }
     
     .bpm-slider, .volume-slider {
