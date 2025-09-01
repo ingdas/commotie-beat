@@ -1,0 +1,339 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #333;
+}
+
+.container {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    max-width: 500px;
+    width: 90%;
+}
+
+h1 {
+    color: #4a5568;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+}
+
+.setup-panel, .countdown-panel {
+    margin-bottom: 2rem;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 1.1rem;
+}
+
+input[type="number"] {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+input[type="number"]:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.start-btn, .stop-btn, .reset-btn, .resume-btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0 0.5rem;
+}
+
+.start-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    width: 100%;
+}
+
+.start-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+}
+
+.stop-btn {
+    background: #e53e3e;
+    color: white;
+}
+
+.stop-btn:hover {
+    background: #c53030;
+    transform: translateY(-2px);
+}
+
+.resume-btn {
+    background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+    color: white;
+}
+
+.resume-btn:hover {
+    background: linear-gradient(135deg, #2f855a 0%, #276749 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(56, 161, 105, 0.3);
+}
+
+.reset-btn {
+    background: #718096;
+    color: white;
+}
+
+.reset-btn:hover {
+    background: #4a5568;
+    transform: translateY(-2px);
+}
+
+.countdown-display {
+    margin-bottom: 2rem;
+}
+
+.timer-display {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.time {
+    font-size: 4rem;
+    font-weight: 900;
+    color: #4a5568;
+    text-shadow: 0 4px 8px rgba(74, 85, 104, 0.3);
+    margin-bottom: 0.5rem;
+    font-family: 'Courier New', monospace;
+}
+
+.required-bpm {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #667eea;
+    margin-bottom: 1rem;
+}
+
+.number {
+    font-size: 8rem;
+    font-weight: 900;
+    color: #667eea;
+    text-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.number.beat {
+    transform: scale(1.1);
+    color: #e53e3e;
+    text-shadow: 0 4px 8px rgba(229, 62, 62, 0.3);
+}
+
+.bpm-slider-container {
+    margin: 2rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.bpm-slider {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.slider-track {
+    width: 100%;
+    height: 8px;
+    background: #e2e8f0;
+    border-radius: 4px;
+    position: relative;
+    cursor: pointer;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.slider-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    border-radius: 4px;
+    width: 50%;
+    transition: width 0.1s ease;
+}
+
+.slider-thumb {
+    position: absolute;
+    top: 50%;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border: 3px solid #667eea;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.1s ease;
+}
+
+.slider-thumb:hover {
+    transform: translate(-50%, -50%) scale(1.1);
+}
+
+.slider-thumb:active {
+    transform: translate(-50%, -50%) scale(0.95);
+}
+
+.slider-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 0.9rem;
+    color: #718096;
+    font-weight: 500;
+}
+
+.bpm-min, .bpm-max {
+    color: #a0aec0;
+}
+
+.bpm-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #4a5568;
+    text-align: center;
+    min-width: 60px;
+}
+
+.volume-slider-container {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+}
+
+.volume-slider {
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.volume-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #4a5568;
+    text-align: center;
+    min-width: 40px;
+}
+
+.volume-min, .volume-max {
+    color: #a0aec0;
+    font-size: 0.9rem;
+}
+
+.controls {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.visualizer {
+    margin-top: 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.beat-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    transition: all 0.1s ease;
+}
+
+.beat-indicator.active {
+    background: #e53e3e;
+    transform: scale(1.5);
+    box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
+    animation: kickPulse 0.3s ease-out;
+}
+
+@keyframes kickPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(229, 62, 62, 0);
+    }
+    50% {
+        transform: scale(2);
+        box-shadow: 0 0 30px rgba(229, 62, 62, 0.8);
+    }
+    100% {
+        transform: scale(1.5);
+        box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
+    }
+}
+
+@media (max-width: 600px) {
+    .container {
+        padding: 1.5rem;
+        width: 95%;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .time {
+        font-size: 3rem;
+    }
+    
+    .number {
+        font-size: 6rem;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .start-btn, .stop-btn, .reset-btn {
+        width: 100%;
+        margin: 0.5rem 0;
+    }
+    
+    .bpm-slider, .volume-slider {
+        width: 250px;
+    }
+}

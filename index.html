@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commotie: The Beat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Commotie: The Beat</h1>
+        
+        <div class="setup-panel" id="setupPanel">
+            <div class="input-group">
+                <label for="durationInput">Target Duration (minutes):</label>
+                <input type="number" id="durationInput" min="1" max="999" value="30" placeholder="Enter minutes">
+            </div>
+            
+            <div class="input-group">
+                <label for="initialBpmInput">Initial Average BPM:</label>
+                <input type="number" id="initialBpmInput" min="30" max="200" value="120" placeholder="Enter BPM">
+            </div>
+            
+            <button id="startBtn" class="start-btn">Start Timer</button>
+        </div>
+        
+        <div class="countdown-panel" id="countdownPanel" style="display: none;">
+            <div class="timer-display">
+                <div class="time" id="timerDisplay">30:00</div>
+                <div class="required-bpm" id="requiredBpmDisplay">Required BPM: 120</div>
+            </div>
+            
+            <div class="countdown-display">
+                <div class="number" id="countdownNumber">10</div>
+            </div>
+            
+            <div class="bpm-slider-container">
+                <div class="bpm-slider">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-fill" id="sliderFill"></div>
+                        <div class="slider-thumb" id="sliderThumb"></div>
+                    </div>
+                    <div class="slider-labels">
+                        <span class="bpm-min">30</span>
+                        <span class="bpm-value" id="currentBpm">120</span>
+                        <span class="bpm-max">200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="volume-slider-container">
+                <div class="volume-slider">
+                    <div class="slider-track" id="volumeSliderTrack">
+                        <div class="slider-fill" id="volumeSliderFill"></div>
+                        <div class="slider-thumb" id="volumeSliderThumb"></div>
+                    </div>
+                    <div class="slider-labels">
+                        <span class="volume-min">20</span>
+                        <span class="volume-value" id="currentVolume">50</span>
+                        <span class="volume-max">100</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="stopBtn" class="stop-btn">Stop</button>
+                <button id="resetBtn" class="reset-btn">Reset</button>
+            </div>
+        </div>
+        
+        <div class="visualizer">
+            <div class="beat-indicator" id="beatIndicator"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
