@@ -138,6 +138,50 @@ input[type="number"]:focus {
     background: #38a169;
 }
 
+.sound-selection-controls {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.sound-selection-controls label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 1rem;
+}
+
+.sound-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.sound-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #4a5568;
+    min-width: 100px;
+}
+
+.sound-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.sound-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
 .beat-frequency-controls {
     margin: 1.5rem 0;
     text-align: center;
@@ -153,9 +197,9 @@ input[type="number"]:focus {
 
 .frequency-buttons {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     gap: 0.5rem;
-    flex-wrap: wrap;
 }
 
 .freq-btn {
@@ -394,6 +438,16 @@ input[type="number"]:focus {
     .start-btn, .stop-btn, .reset-btn, .heartbeat-btn {
         width: 100%;
         margin: 0.5rem 0;
+    }
+    
+    .sound-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .sound-btn {
+        width: 100%;
+        margin: 0.25rem 0;
     }
     
     .frequency-buttons {

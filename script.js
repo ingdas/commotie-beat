@@ -12,10 +12,12 @@ class BeatCountdownTimer {
         this.timerInterval = null;
         this.isHeartbeatMode = false;
         this.beatFrequency = 1; // Default: every beat
+        this.selectedSound = 'kick'; // Default sound type
         
         // MIDI-like scheduling system
         this.animationFrameId = null;
         this.scheduledBeats = [];
+        this.scheduledVisualBeats = []; // Separate queue for visual countdown updates
         this.nextBeatTime = 0;
         this.beatInterval = 0;
         this.lastScheduledBeat = 0;
@@ -40,6 +42,11 @@ class BeatCountdownTimer {
         this.currentBpm = document.getElementById('currentBpm');
         this.beatIndicator = document.getElementById('beatIndicator');
         this.heartbeatToggleBtn = document.getElementById('heartbeatToggleBtn');
+        this.kickBtn = document.getElementById('kickBtn');
+        this.heartbeatBtn = document.getElementById('heartbeatBtn');
+        this.clockBtn = document.getElementById('clockBtn');
+        this.metronomeBtn = document.getElementById('metronomeBtn');
+        this.bellBtn = document.getElementById('bellBtn');
         this.freq1Btn = document.getElementById('freq1Btn');
         this.freq2Btn = document.getElementById('freq2Btn');
         this.freq3Btn = document.getElementById('freq3Btn');
@@ -60,6 +67,13 @@ class BeatCountdownTimer {
         this.stopBtn.addEventListener('click', () => this.toggleStopResume());
         this.resetBtn.addEventListener('click', () => this.resetCountdown());
         this.heartbeatToggleBtn.addEventListener('click', () => this.toggleHeartbeatMode());
+        
+        // Sound selection controls
+        this.kickBtn.addEventListener('click', () => this.setSoundType('kick'));
+        this.heartbeatBtn.addEventListener('click', () => this.setSoundType('heartbeat'));
+        this.clockBtn.addEventListener('click', () => this.setSoundType('clock'));
+        this.metronomeBtn.addEventListener('click', () => this.setSoundType('metronome'));
+        this.bellBtn.addEventListener('click', () => this.setSoundType('bell'));
         
         // Beat frequency controls
         this.freq1Btn.addEventListener('click', () => this.setBeatFrequency(1));
@@ -282,11 +296,7 @@ class BeatCountdownTimer {
         // All other beats are handled by the scheduled audio system
         if (!this.audioContext) return;
         
-        if (this.isHeartbeatMode) {
-            this.scheduleHeartbeatAudio(this.audioContext.currentTime);
-        } else {
-            this.scheduleRegularKickAudio(this.audioContext.currentTime);
-        }
+        this.scheduleBeatAudio(this.audioContext.currentTime);
     }
     
     startCountdown() {
@@ -363,7 +373,13 @@ class BeatCountdownTimer {
         while (this.nextBeatTime < scheduleEndTime && this.countdown > 0) {
             const beatNumber = this.originalCountdown - this.countdown + 1;
             
-            // Only schedule beats that match the frequency
+            // Schedule visual countdown for every beat
+            this.scheduledVisualBeats.push({
+                time: this.nextBeatTime,
+                beatNumber: beatNumber
+            });
+            
+            // Only schedule audio for beats that match the frequency
             if (beatNumber % this.beatFrequency === 0) {
                 this.scheduledBeats.push({
                     time: this.nextBeatTime,
@@ -384,14 +400,28 @@ class BeatCountdownTimer {
     }
     
     scheduleBeatAudio(scheduledTime) {
-        if (this.isHeartbeatMode) {
-            this.scheduleHeartbeatAudio(scheduledTime);
-        } else {
-            this.scheduleRegularKickAudio(scheduledTime);
+        switch(this.selectedSound) {
+            case 'kick':
+                this.scheduleKickDrumAudio(scheduledTime);
+                break;
+            case 'heartbeat':
+                this.scheduleHeartbeatAudio(scheduledTime);
+                break;
+            case 'clock':
+                this.scheduleClockAudio(scheduledTime);
+                break;
+            case 'metronome':
+                this.scheduleMetronomeAudio(scheduledTime);
+                break;
+            case 'bell':
+                this.scheduleBellAudio(scheduledTime);
+                break;
+            default:
+                this.scheduleKickDrumAudio(scheduledTime);
         }
     }
     
-    scheduleRegularKickAudio(scheduledTime) {
+    scheduleKickDrumAudio(scheduledTime) {
         // Create a more realistic kick drum sound
         const oscillator = this.audioContext.createOscillator();
         const gainNode = this.audioContext.createGain();
@@ -480,21 +510,108 @@ class BeatCountdownTimer {
         oscillator2.stop(scheduledTime + secondBeatDelay + 0.35);
     }
     
+    scheduleClockAudio(scheduledTime) {
+        // Create a clock tick sound
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Clock tick character - sharp, metallic
+        filter.type = 'highpass';
+        filter.frequency.setValueAtTime(2000, scheduledTime);
+        filter.frequency.exponentialRampToValueAtTime(800, scheduledTime + 0.05);
+        
+        oscillator.frequency.setValueAtTime(3000, scheduledTime);
+        oscillator.frequency.exponentialRampToValueAtTime(1000, scheduledTime + 0.05);
+        
+        // Sharp, quick envelope
+        const volumeMultiplier = this.volume / 100;
+        gainNode.gain.setValueAtTime(0, scheduledTime);
+        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.6, scheduledTime + 0.005);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.1);
+        
+        oscillator.start(scheduledTime);
+        oscillator.stop(scheduledTime + 0.1);
+    }
+    
+    scheduleMetronomeAudio(scheduledTime) {
+        // Create a metronome click sound
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Metronome character - clean, precise
+        filter.type = 'bandpass';
+        filter.frequency.setValueAtTime(2000, scheduledTime);
+        filter.Q.setValueAtTime(5, scheduledTime);
+        
+        oscillator.frequency.setValueAtTime(2000, scheduledTime);
+        
+        // Clean, precise envelope
+        const volumeMultiplier = this.volume / 100;
+        gainNode.gain.setValueAtTime(0, scheduledTime);
+        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.7, scheduledTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.15);
+        
+        oscillator.start(scheduledTime);
+        oscillator.stop(scheduledTime + 0.15);
+    }
+    
+    scheduleBellAudio(scheduledTime) {
+        // Create a bell sound
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+        
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Bell character - bright, resonant
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(3000, scheduledTime);
+        filter.frequency.exponentialRampToValueAtTime(1000, scheduledTime + 0.5);
+        
+        oscillator.frequency.setValueAtTime(800, scheduledTime);
+        
+        // Bell envelope - quick attack, long decay
+        const volumeMultiplier = this.volume / 100;
+        gainNode.gain.setValueAtTime(0, scheduledTime);
+        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, scheduledTime + 0.02);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 1.0);
+        
+        oscillator.start(scheduledTime);
+        oscillator.stop(scheduledTime + 1.0);
+    }
+    
     schedulerLoop() {
         if (!this.isRunning) return;
         
         const currentTime = this.audioContext.currentTime;
         
-        // Check for beats that should trigger visual feedback
+        // Check for visual countdown beats (every beat interval)
+        while (this.scheduledVisualBeats.length > 0 && this.scheduledVisualBeats[0].time <= currentTime) {
+            const visualBeat = this.scheduledVisualBeats.shift();
+            this.updateDisplay();
+        }
+        
+        // Check for audio beats (only beats that match frequency)
         while (this.scheduledBeats.length > 0 && this.scheduledBeats[0].time <= currentTime) {
-            const beat = this.scheduledBeats.shift();
+            const audioBeat = this.scheduledBeats.shift();
             // Log timing accuracy for debugging
-            const timingError = Math.abs(currentTime - beat.time);
+            const timingError = Math.abs(currentTime - audioBeat.time);
             if (timingError > 0.01) { // Log if timing error is > 10ms
                 console.log(`Timing error: ${(timingError * 1000).toFixed(2)}ms`);
             }
             this.triggerBeatAnimation();
-            this.updateDisplay();
         }
         
         // Check if we're done
@@ -538,6 +655,35 @@ class BeatCountdownTimer {
         } else {
             this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
             this.heartbeatToggleBtn.classList.remove('active');
+        }
+    }
+    
+    setSoundType(soundType) {
+        this.selectedSound = soundType;
+        
+        // Update button states
+        this.kickBtn.classList.remove('active');
+        this.heartbeatBtn.classList.remove('active');
+        this.clockBtn.classList.remove('active');
+        this.metronomeBtn.classList.remove('active');
+        this.bellBtn.classList.remove('active');
+        
+        switch(soundType) {
+            case 'kick':
+                this.kickBtn.classList.add('active');
+                break;
+            case 'heartbeat':
+                this.heartbeatBtn.classList.add('active');
+                break;
+            case 'clock':
+                this.clockBtn.classList.add('active');
+                break;
+            case 'metronome':
+                this.metronomeBtn.classList.add('active');
+                break;
+            case 'bell':
+                this.bellBtn.classList.add('active');
+                break;
         }
     }
     
@@ -598,6 +744,7 @@ class BeatCountdownTimer {
             this.startTime = this.audioContext.currentTime;
             this.nextBeatTime = this.startTime;
             this.scheduledBeats = [];
+            this.scheduledVisualBeats = [];
             
             this.startTimer();
             this.startCountdownTimer();
@@ -616,12 +763,14 @@ class BeatCountdownTimer {
         this.bpm = parseInt(this.initialBpmInput.value);
         this.isHeartbeatMode = false;
         this.beatFrequency = 1;
+        this.selectedSound = 'kick';
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
         this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
         this.heartbeatToggleBtn.classList.remove('active');
         this.setBeatFrequency(1); // Reset to every beat
+        this.setSoundType('kick'); // Reset to kick drum
         this.showSetupPanel();
         // Reset button to Stop state
         this.stopBtn.textContent = 'Stop';
