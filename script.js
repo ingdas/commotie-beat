@@ -23,9 +23,16 @@ class BeatCountdownTimer {
         this.lastScheduledBeat = 0;
         this.lookaheadTime = 0.1; // Schedule beats 100ms ahead
         
+        // Audio buffers for WAV files
+        this.audioBuffers = {
+            clock: null,
+            metronome: null
+        };
+        
         this.initializeElements();
         this.setupEventListeners();
         this.initializeAudio();
+        this.loadAudioFiles();
     }
     
     initializeElements() {
@@ -41,7 +48,7 @@ class BeatCountdownTimer {
         this.requiredBpmDisplay = document.getElementById('requiredBpmDisplay');
         this.currentBpm = document.getElementById('currentBpm');
         this.beatIndicator = document.getElementById('beatIndicator');
-        this.heartbeatToggleBtn = document.getElementById('heartbeatToggleBtn');
+
         this.kickBtn = document.getElementById('kickBtn');
         this.heartbeatBtn = document.getElementById('heartbeatBtn');
         this.clockBtn = document.getElementById('clockBtn');
@@ -66,7 +73,7 @@ class BeatCountdownTimer {
         this.startBtn.addEventListener('click', () => this.startCountdown());
         this.stopBtn.addEventListener('click', () => this.toggleStopResume());
         this.resetBtn.addEventListener('click', () => this.resetCountdown());
-        this.heartbeatToggleBtn.addEventListener('click', () => this.toggleHeartbeatMode());
+
         
         // Sound selection controls
         this.kickBtn.addEventListener('click', () => this.setSoundType('kick'));
@@ -81,18 +88,34 @@ class BeatCountdownTimer {
         this.freq3Btn.addEventListener('click', () => this.setBeatFrequency(3));
         this.freq4Btn.addEventListener('click', () => this.setBeatFrequency(4));
         
-        // Prevent non-numeric input for duration
+        // Handle duration input - only clean non-numeric characters, validate on blur
         this.durationInput.addEventListener('input', (e) => {
-            const value = parseInt(e.target.value);
-            if (value < 1) e.target.value = 1;
-            if (value > 999) e.target.value = 999;
+            // Only remove non-numeric characters, don't enforce min/max while typing
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
         
-        // Prevent non-numeric input for initial BPM
-        this.initialBpmInput.addEventListener('input', (e) => {
+        this.durationInput.addEventListener('blur', (e) => {
             const value = parseInt(e.target.value);
-            if (value < 30) e.target.value = 30;
-            if (value > 200) e.target.value = 200;
+            if (isNaN(value) || value < 1) {
+                e.target.value = 1;
+            } else if (value > 999) {
+                e.target.value = 999;
+            }
+        });
+        
+        // Handle initial BPM input - only clean non-numeric characters, validate on blur
+        this.initialBpmInput.addEventListener('input', (e) => {
+            // Only remove non-numeric characters, don't enforce min/max while typing
+            e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+        
+        this.initialBpmInput.addEventListener('blur', (e) => {
+            const value = parseInt(e.target.value);
+            if (isNaN(value) || value < 30) {
+                e.target.value = 30;
+            } else if (value > 200) {
+                e.target.value = 200;
+            }
         });
         
         // BPM Slider functionality
@@ -109,6 +132,86 @@ class BeatCountdownTimer {
         } catch (e) {
             console.warn('Web Audio API not supported:', e);
         }
+    }
+    
+    async loadAudioFiles() {
+        if (!this.audioContext) return;
+        
+        try {
+            const clockUrl = 'https://freesound.org/data/previews/316/316847_5123451-lq.mp3';
+            const clockUrlAlt = 'https://archive.org/download/ClockTickingSound/clock-ticking.wav';
+            
+            const metronomeUrl = './metronome.wav';
+            const metronomeUrlAlt = 'https://archive.org/download/MetronomeClickSound/metronome-click.wav';
+            
+            // Try to load clock sound
+            try {
+                this.audioBuffers.clock = await this.loadAudioBuffer(clockUrl);
+                console.log('Clock sound loaded successfully');
+            } catch (e) {
+                console.warn('Failed to load clock sound from primary URL, trying alternative...');
+                try {
+                    this.audioBuffers.clock = await this.loadAudioBuffer(clockUrlAlt);
+                    console.log('Clock sound loaded from alternative URL');
+                } catch (e2) {
+                    console.warn('Failed to load clock sound from alternative URL:', e2);
+                    // If both fail, we'll use the fallback generated sound
+                    console.log('Using fallback generated clock sound');
+                }
+            }
+            
+            // Try to load metronome sound
+            try {
+                this.audioBuffers.metronome = await this.loadAudioBuffer(metronomeUrl);
+                console.log('Metronome sound loaded successfully');
+            } catch (e) {
+                console.warn('Failed to load metronome sound from primary URL, trying alternative...');
+                try {
+                    this.audioBuffers.metronome = await this.loadAudioBuffer(metronomeUrlAlt);
+                    console.log('Metronome sound loaded from alternative URL');
+                } catch (e2) {
+                    console.warn('Failed to load metronome sound from alternative URL:', e2);
+                    // If both fail, we'll use the fallback generated sound
+                    console.log('Using fallback generated metronome sound');
+                }
+            }
+            
+        } catch (error) {
+            console.error('Error loading audio files:', error);
+        }
+    }
+    
+    async loadAudioBuffer(url) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const arrayBuffer = await response.arrayBuffer();
+            const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+            return audioBuffer;
+        } catch (error) {
+            console.error(`Error loading audio from ${url}:`, error);
+            throw error;
+        }
+    }
+    
+    playAudioBuffer(audioBuffer, scheduledTime) {
+        if (!audioBuffer || !this.audioContext) return;
+        
+        const source = this.audioContext.createBufferSource();
+        const gainNode = this.audioContext.createGain();
+        
+        source.buffer = audioBuffer;
+        source.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Apply volume control
+        const volumeMultiplier = this.volume / 100;
+        gainNode.gain.setValueAtTime(volumeMultiplier, scheduledTime);
+        
+        // Schedule playback
+        source.start(scheduledTime);
     }
     
     setupBpmSlider() {
@@ -511,58 +614,68 @@ class BeatCountdownTimer {
     }
     
     scheduleClockAudio(scheduledTime) {
-        // Create a clock tick sound
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        const filter = this.audioContext.createBiquadFilter();
-        
-        oscillator.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Clock tick character - sharp, metallic
-        filter.type = 'highpass';
-        filter.frequency.setValueAtTime(2000, scheduledTime);
-        filter.frequency.exponentialRampToValueAtTime(800, scheduledTime + 0.05);
-        
-        oscillator.frequency.setValueAtTime(3000, scheduledTime);
-        oscillator.frequency.exponentialRampToValueAtTime(1000, scheduledTime + 0.05);
-        
-        // Sharp, quick envelope
-        const volumeMultiplier = this.volume / 100;
-        gainNode.gain.setValueAtTime(0, scheduledTime);
-        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.6, scheduledTime + 0.005);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.1);
-        
-        oscillator.start(scheduledTime);
-        oscillator.stop(scheduledTime + 0.1);
+        // Use WAV file if available, otherwise fall back to generated sound
+        if (this.audioBuffers.clock) {
+            this.playAudioBuffer(this.audioBuffers.clock, scheduledTime);
+        } else {
+            // Fallback to generated clock tick sound
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            const filter = this.audioContext.createBiquadFilter();
+            
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            // Clock tick character - sharp, metallic
+            filter.type = 'highpass';
+            filter.frequency.setValueAtTime(2000, scheduledTime);
+            filter.frequency.exponentialRampToValueAtTime(800, scheduledTime + 0.05);
+            
+            oscillator.frequency.setValueAtTime(3000, scheduledTime);
+            oscillator.frequency.exponentialRampToValueAtTime(1000, scheduledTime + 0.05);
+            
+            // Sharp, quick envelope
+            const volumeMultiplier = this.volume / 100;
+            gainNode.gain.setValueAtTime(0, scheduledTime);
+            gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.6, scheduledTime + 0.005);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.1);
+            
+            oscillator.start(scheduledTime);
+            oscillator.stop(scheduledTime + 0.1);
+        }
     }
     
     scheduleMetronomeAudio(scheduledTime) {
-        // Create a metronome click sound
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        const filter = this.audioContext.createBiquadFilter();
-        
-        oscillator.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Metronome character - clean, precise
-        filter.type = 'bandpass';
-        filter.frequency.setValueAtTime(2000, scheduledTime);
-        filter.Q.setValueAtTime(5, scheduledTime);
-        
-        oscillator.frequency.setValueAtTime(2000, scheduledTime);
-        
-        // Clean, precise envelope
-        const volumeMultiplier = this.volume / 100;
-        gainNode.gain.setValueAtTime(0, scheduledTime);
-        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.7, scheduledTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.15);
-        
-        oscillator.start(scheduledTime);
-        oscillator.stop(scheduledTime + 0.15);
+        // Use WAV file if available, otherwise fall back to generated sound
+        if (this.audioBuffers.metronome) {
+            this.playAudioBuffer(this.audioBuffers.metronome, scheduledTime);
+        } else {
+            // Fallback to generated metronome click sound
+            const oscillator = this.audioContext.createOscillator();
+            const gainNode = this.audioContext.createGain();
+            const filter = this.audioContext.createBiquadFilter();
+            
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(this.audioContext.destination);
+            
+            // Metronome character - clean, precise
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(2000, scheduledTime);
+            filter.Q.setValueAtTime(5, scheduledTime);
+            
+            oscillator.frequency.setValueAtTime(2000, scheduledTime);
+            
+            // Clean, precise envelope
+            const volumeMultiplier = this.volume / 100;
+            gainNode.gain.setValueAtTime(0, scheduledTime);
+            gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.7, scheduledTime + 0.01);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.15);
+            
+            oscillator.start(scheduledTime);
+            oscillator.stop(scheduledTime + 0.15);
+        }
     }
     
     scheduleBellAudio(scheduledTime) {
@@ -646,17 +759,7 @@ class BeatCountdownTimer {
         this.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     }
     
-    toggleHeartbeatMode() {
-        this.isHeartbeatMode = !this.isHeartbeatMode;
-        
-        if (this.isHeartbeatMode) {
-            this.heartbeatToggleBtn.textContent = 'Regular Kick';
-            this.heartbeatToggleBtn.classList.add('active');
-        } else {
-            this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
-            this.heartbeatToggleBtn.classList.remove('active');
-        }
-    }
+
     
     setSoundType(soundType) {
         this.selectedSound = soundType;
@@ -767,8 +870,7 @@ class BeatCountdownTimer {
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
-        this.heartbeatToggleBtn.textContent = 'Heartbeat Mode';
-        this.heartbeatToggleBtn.classList.remove('active');
+
         this.setBeatFrequency(1); // Reset to every beat
         this.setSoundType('kick'); // Reset to kick drum
         this.showSetupPanel();
