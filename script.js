@@ -3,16 +3,23 @@ class BeatCountdownTimer {
         this.countdown = 0;
         this.bpm = 120;
         this.volume = 50; // Default volume 50%
-        this.interval = null;
         this.audioContext = null;
         this.isRunning = false;
         this.originalCountdown = 0;
-        this.lastBeatTime = 0;
+        this.startTime = 0;
         this.targetDurationMinutes = 30;
         this.remainingTimeSeconds = 0;
         this.timerInterval = null;
         this.isHeartbeatMode = false;
         this.beatFrequency = 1; // Default: every beat
+        
+        // MIDI-like scheduling system
+        this.animationFrameId = null;
+        this.scheduledBeats = [];
+        this.nextBeatTime = 0;
+        this.beatInterval = 0;
+        this.lastScheduledBeat = 0;
+        this.lookaheadTime = 0.1; // Schedule beats 100ms ahead
         
         this.initializeElements();
         this.setupEventListeners();
@@ -110,49 +117,12 @@ class BeatCountdownTimer {
         };
         
         const applyBpmChange = () => {
-            // Update the interval timing without restarting the countdown
-            if (this.isRunning && this.interval) {
-                // Store the current time to maintain synchronization
-                const now = Date.now();
-                const timeSinceLastBeat = now - this.lastBeatTime;
-                const newIntervalMs = (60 / this.bpm) * 1000;
-                
-                // Calculate when the next beat should occur
-                const nextBeatTime = this.lastBeatTime + newIntervalMs;
-                const timeUntilNextBeat = Math.max(0, nextBeatTime - now);
-                
-                // Clear current interval
-                clearInterval(this.interval);
-                
-                // Set a timeout for the next beat, then start the regular interval
-                setTimeout(() => {
-                    this.countdown--;
-                    this.playBassDrum();
-                    this.triggerBeatAnimation();
-                    this.lastBeatTime = Date.now();
-                    
-                    if (this.countdown <= 0) {
-                        this.stopCountdown();
-                        this.showCompletion();
-                    } else {
-                        this.updateDisplay();
-                        
-                        // Start the regular interval after the first beat
-                        this.interval = setInterval(() => {
-                            this.countdown--;
-                            this.playBassDrum();
-                            this.triggerBeatAnimation();
-                            this.lastBeatTime = Date.now();
-                            
-                            if (this.countdown <= 0) {
-                                this.stopCountdown();
-                                this.showCompletion();
-                            } else {
-                                this.updateDisplay();
-                            }
-                        }, newIntervalMs);
-                    }
-                }, timeUntilNextBeat);
+            // Update the beat interval for MIDI-like scheduling
+            if (this.isRunning) {
+                this.beatInterval = 60 / this.bpm;
+                // Clear existing scheduled beats and reschedule with new timing
+                this.scheduledBeats = [];
+                this.nextBeatTime = this.audioContext.currentTime;
             }
             
             // Update the required BPM display
@@ -308,106 +278,15 @@ class BeatCountdownTimer {
     }
     
     playBassDrum() {
+        // This method is kept for the immediate first beat
+        // All other beats are handled by the scheduled audio system
         if (!this.audioContext) return;
         
         if (this.isHeartbeatMode) {
-            this.playHeartbeat();
+            this.scheduleHeartbeatAudio(this.audioContext.currentTime);
         } else {
-            this.playRegularKick();
+            this.scheduleRegularKickAudio(this.audioContext.currentTime);
         }
-    }
-    
-    playRegularKick() {
-        // Create a more realistic kick drum sound
-        const oscillator = this.audioContext.createOscillator();
-        const gainNode = this.audioContext.createGain();
-        const filter = this.audioContext.createBiquadFilter();
-        
-        // Connect the audio chain
-        oscillator.connect(filter);
-        filter.connect(gainNode);
-        gainNode.connect(this.audioContext.destination);
-        
-        // Set filter for kick drum character
-        filter.type = 'lowpass';
-        filter.frequency.setValueAtTime(200, this.audioContext.currentTime);
-        filter.frequency.exponentialRampToValueAtTime(50, this.audioContext.currentTime + 0.1);
-        
-        // Kick drum frequency sweep
-        oscillator.frequency.setValueAtTime(80, this.audioContext.currentTime);
-        oscillator.frequency.exponentialRampToValueAtTime(20, this.audioContext.currentTime + 0.1);
-        
-        // Volume envelope with user-controlled volume
-        const volumeMultiplier = this.volume / 100; // Convert percentage to 0-1 range
-        gainNode.gain.setValueAtTime(0, this.audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(volumeMultiplier, this.audioContext.currentTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-        
-        // Start and stop the oscillator
-        oscillator.start(this.audioContext.currentTime);
-        oscillator.stop(this.audioContext.currentTime + 0.3);
-    }
-    
-    playHeartbeat() {
-        const volumeMultiplier = this.volume / 100;
-        const currentTime = this.audioContext.currentTime;
-        
-        // Calculate the beat interval in seconds
-        const beatInterval = 60 / this.bpm;
-        // Second beat occurs at 1/4 of the beat interval
-        const secondBeatDelay = beatInterval * 0.25;
-        
-        // Create the double beat heartbeat sound
-        // First beat (stronger)
-        const oscillator1 = this.audioContext.createOscillator();
-        const gainNode1 = this.audioContext.createGain();
-        const filter1 = this.audioContext.createBiquadFilter();
-        
-        oscillator1.connect(filter1);
-        filter1.connect(gainNode1);
-        gainNode1.connect(this.audioContext.destination);
-        
-        // Heartbeat character - lower frequency, softer attack
-        filter1.type = 'lowpass';
-        filter1.frequency.setValueAtTime(150, currentTime);
-        filter1.frequency.exponentialRampToValueAtTime(40, currentTime + 0.15);
-        
-        oscillator1.frequency.setValueAtTime(60, currentTime);
-        oscillator1.frequency.exponentialRampToValueAtTime(15, currentTime + 0.15);
-        
-        // Volume envelope for first beat
-        gainNode1.gain.setValueAtTime(0, currentTime);
-        gainNode1.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, currentTime + 0.02);
-        gainNode1.gain.exponentialRampToValueAtTime(0.01, currentTime + 0.4);
-        
-        oscillator1.start(currentTime);
-        oscillator1.stop(currentTime + 0.4);
-        
-        // Second beat (softer, slightly higher pitch) - rhythmically aligned
-        setTimeout(() => {
-            const oscillator2 = this.audioContext.createOscillator();
-            const gainNode2 = this.audioContext.createGain();
-            const filter2 = this.audioContext.createBiquadFilter();
-            
-            oscillator2.connect(filter2);
-            filter2.connect(gainNode2);
-            gainNode2.connect(this.audioContext.destination);
-            
-            filter2.type = 'lowpass';
-            filter2.frequency.setValueAtTime(180, currentTime + secondBeatDelay);
-            filter2.frequency.exponentialRampToValueAtTime(50, currentTime + secondBeatDelay + 0.15);
-            
-            oscillator2.frequency.setValueAtTime(70, currentTime + secondBeatDelay);
-            oscillator2.frequency.exponentialRampToValueAtTime(20, currentTime + secondBeatDelay + 0.15);
-            
-            // Volume envelope for second beat (softer)
-            gainNode2.gain.setValueAtTime(0, currentTime + secondBeatDelay);
-            gainNode2.gain.linearRampToValueAtTime(volumeMultiplier * 0.5, currentTime + secondBeatDelay + 0.02);
-            gainNode2.gain.exponentialRampToValueAtTime(0.01, currentTime + secondBeatDelay + 0.35);
-            
-            oscillator2.start(currentTime + secondBeatDelay);
-            oscillator2.stop(currentTime + secondBeatDelay + 0.35);
-        }, secondBeatDelay * 1000); // Convert to milliseconds for setTimeout
     }
     
     startCountdown() {
@@ -459,35 +338,177 @@ class BeatCountdownTimer {
 
     
     startTimer() {
-        const intervalMs = (60 / this.bpm) * 1000; // Convert BPM to milliseconds
+        // Calculate beat interval in seconds
+        this.beatInterval = 60 / this.bpm;
+        this.startTime = this.audioContext.currentTime;
+        this.nextBeatTime = this.startTime;
+        this.lastScheduledBeat = 0;
         
-        // Initialize the last beat time
-        this.lastBeatTime = Date.now();
-        
-        this.interval = setInterval(() => {
-            this.countdown--;
-            
-            // Only play sound and animation on beats that match the frequency
-            if (this.countdown % this.beatFrequency === 0) {
-                this.playBassDrum();
-                this.triggerBeatAnimation();
-            }
-            
-            this.lastBeatTime = Date.now();
-            
-            if (this.countdown <= 0) {
-                this.stopCountdown();
-                this.showCompletion();
-            } else {
-                this.updateDisplay();
-            }
-        }, intervalMs);
+        // Start the MIDI-like scheduling loop
+        this.scheduleBeats();
+        this.animationFrameId = requestAnimationFrame(() => this.schedulerLoop());
         
         // Play first beat immediately if it matches frequency
         if (this.countdown % this.beatFrequency === 0) {
             this.playBassDrum();
             this.triggerBeatAnimation();
         }
+    }
+    
+    scheduleBeats() {
+        const currentTime = this.audioContext.currentTime;
+        const scheduleEndTime = currentTime + this.lookaheadTime;
+        
+        // Schedule beats up to the lookahead time
+        while (this.nextBeatTime < scheduleEndTime && this.countdown > 0) {
+            const beatNumber = this.originalCountdown - this.countdown + 1;
+            
+            // Only schedule beats that match the frequency
+            if (beatNumber % this.beatFrequency === 0) {
+                this.scheduledBeats.push({
+                    time: this.nextBeatTime,
+                    beatNumber: beatNumber
+                });
+                
+                // Schedule the audio
+                this.scheduleBeatAudio(this.nextBeatTime);
+            }
+            
+            this.nextBeatTime += this.beatInterval;
+            this.countdown--;
+            
+            if (this.countdown <= 0) {
+                break;
+            }
+        }
+    }
+    
+    scheduleBeatAudio(scheduledTime) {
+        if (this.isHeartbeatMode) {
+            this.scheduleHeartbeatAudio(scheduledTime);
+        } else {
+            this.scheduleRegularKickAudio(scheduledTime);
+        }
+    }
+    
+    scheduleRegularKickAudio(scheduledTime) {
+        // Create a more realistic kick drum sound
+        const oscillator = this.audioContext.createOscillator();
+        const gainNode = this.audioContext.createGain();
+        const filter = this.audioContext.createBiquadFilter();
+        
+        // Connect the audio chain
+        oscillator.connect(filter);
+        filter.connect(gainNode);
+        gainNode.connect(this.audioContext.destination);
+        
+        // Set filter for kick drum character
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(200, scheduledTime);
+        filter.frequency.exponentialRampToValueAtTime(50, scheduledTime + 0.1);
+        
+        // Kick drum frequency sweep
+        oscillator.frequency.setValueAtTime(80, scheduledTime);
+        oscillator.frequency.exponentialRampToValueAtTime(20, scheduledTime + 0.1);
+        
+        // Volume envelope with user-controlled volume
+        const volumeMultiplier = this.volume / 100;
+        gainNode.gain.setValueAtTime(0, scheduledTime);
+        gainNode.gain.linearRampToValueAtTime(volumeMultiplier, scheduledTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.3);
+        
+        // Start and stop the oscillator
+        oscillator.start(scheduledTime);
+        oscillator.stop(scheduledTime + 0.3);
+    }
+    
+    scheduleHeartbeatAudio(scheduledTime) {
+        const volumeMultiplier = this.volume / 100;
+        
+        // Calculate the beat interval in seconds
+        const beatInterval = 60 / this.bpm;
+        // Second beat occurs at 1/4 of the beat interval
+        const secondBeatDelay = beatInterval * 0.25;
+        
+        // First beat (stronger)
+        const oscillator1 = this.audioContext.createOscillator();
+        const gainNode1 = this.audioContext.createGain();
+        const filter1 = this.audioContext.createBiquadFilter();
+        
+        oscillator1.connect(filter1);
+        filter1.connect(gainNode1);
+        gainNode1.connect(this.audioContext.destination);
+        
+        // Heartbeat character - lower frequency, softer attack
+        filter1.type = 'lowpass';
+        filter1.frequency.setValueAtTime(150, scheduledTime);
+        filter1.frequency.exponentialRampToValueAtTime(40, scheduledTime + 0.15);
+        
+        oscillator1.frequency.setValueAtTime(60, scheduledTime);
+        oscillator1.frequency.exponentialRampToValueAtTime(15, scheduledTime + 0.15);
+        
+        // Volume envelope for first beat
+        gainNode1.gain.setValueAtTime(0, scheduledTime);
+        gainNode1.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, scheduledTime + 0.02);
+        gainNode1.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.4);
+        
+        oscillator1.start(scheduledTime);
+        oscillator1.stop(scheduledTime + 0.4);
+        
+        // Second beat (softer, slightly higher pitch)
+        const oscillator2 = this.audioContext.createOscillator();
+        const gainNode2 = this.audioContext.createGain();
+        const filter2 = this.audioContext.createBiquadFilter();
+        
+        oscillator2.connect(filter2);
+        filter2.connect(gainNode2);
+        gainNode2.connect(this.audioContext.destination);
+        
+        filter2.type = 'lowpass';
+        filter2.frequency.setValueAtTime(180, scheduledTime + secondBeatDelay);
+        filter2.frequency.exponentialRampToValueAtTime(50, scheduledTime + secondBeatDelay + 0.15);
+        
+        oscillator2.frequency.setValueAtTime(70, scheduledTime + secondBeatDelay);
+        oscillator2.frequency.exponentialRampToValueAtTime(20, scheduledTime + secondBeatDelay + 0.15);
+        
+        // Volume envelope for second beat (softer)
+        gainNode2.gain.setValueAtTime(0, scheduledTime + secondBeatDelay);
+        gainNode2.gain.linearRampToValueAtTime(volumeMultiplier * 0.5, scheduledTime + secondBeatDelay + 0.02);
+        gainNode2.gain.exponentialRampToValueAtTime(0.01, scheduledTime + secondBeatDelay + 0.35);
+        
+        oscillator2.start(scheduledTime + secondBeatDelay);
+        oscillator2.stop(scheduledTime + secondBeatDelay + 0.35);
+    }
+    
+    schedulerLoop() {
+        if (!this.isRunning) return;
+        
+        const currentTime = this.audioContext.currentTime;
+        
+        // Check for beats that should trigger visual feedback
+        while (this.scheduledBeats.length > 0 && this.scheduledBeats[0].time <= currentTime) {
+            const beat = this.scheduledBeats.shift();
+            // Log timing accuracy for debugging
+            const timingError = Math.abs(currentTime - beat.time);
+            if (timingError > 0.01) { // Log if timing error is > 10ms
+                console.log(`Timing error: ${(timingError * 1000).toFixed(2)}ms`);
+            }
+            this.triggerBeatAnimation();
+            this.updateDisplay();
+        }
+        
+        // Check if we're done
+        if (this.countdown <= 0) {
+            this.stopCountdown();
+            this.showCompletion();
+            return;
+        }
+        
+        // Schedule more beats if needed
+        this.scheduleBeats();
+        
+        // Continue the loop
+        this.animationFrameId = requestAnimationFrame(() => this.schedulerLoop());
     }
     
     startCountdownTimer() {
@@ -554,9 +575,9 @@ class BeatCountdownTimer {
     }
     
     stopCountdown() {
-        if (this.interval) {
-            clearInterval(this.interval);
-            this.interval = null;
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
         }
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
@@ -572,6 +593,12 @@ class BeatCountdownTimer {
     resumeCountdown() {
         if (this.countdown > 0) {
             this.isRunning = true;
+            // Recalculate timing for resume
+            this.beatInterval = 60 / this.bpm;
+            this.startTime = this.audioContext.currentTime;
+            this.nextBeatTime = this.startTime;
+            this.scheduledBeats = [];
+            
             this.startTimer();
             this.startCountdownTimer();
             this.stopBtn.textContent = 'Stop';
@@ -580,12 +607,7 @@ class BeatCountdownTimer {
         }
     }
     
-    restartTimer() {
-        if (this.interval) {
-            clearInterval(this.interval);
-        }
-        this.startTimer();
-    }
+
     
     resetCountdown() {
         this.stopCountdown();
