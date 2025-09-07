@@ -133,11 +133,18 @@ class BeatCountdownTimer {
         endingButtonsContainer.innerHTML = '';
         
         // Generate buttons from sound configuration
-        this.soundConfig.forEach(soundConfig => {
+        this.soundConfig.forEach((soundConfig, index) => {
             const button = document.createElement('button');
             button.id = `${soundConfig.label.replace(/\s+/g, '')}Btn`;
             button.className = 'sound-btn';
-            button.textContent = soundConfig.label;
+            
+            // Add number prefix for regular sounds (not ending sounds)
+            if (soundConfig.type === 'end') {
+                button.textContent = soundConfig.label;
+            } else {
+                button.textContent = `${index + 1}. ${soundConfig.label}`;
+            }
+            
             button.dataset.soundType = soundConfig.label;
             
             // Separate regular sounds from ending sounds
