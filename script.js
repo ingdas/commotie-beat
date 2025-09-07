@@ -38,7 +38,7 @@ class BeatCountdownTimer {
                 label: 'Heart Beat'
             },
             {
-                generator: 'scheduleClockAudio',
+                urls: ['./clock1.wav', './clock2.wav'],
                 label: 'Clock'
             },
             {
@@ -53,9 +53,12 @@ class BeatCountdownTimer {
         
         // Audio buffers for URL-based sounds
         this.audioBuffers = {
-            clock: null,
+            clock: [],
             metronome: null
         };
+        
+        // Alternation counters for sounds with multiple URLs
+        this.soundAlternationCounters = {};
         
         this.initializeElements();
         this.generateSoundButtons();
@@ -197,6 +200,8 @@ class BeatCountdownTimer {
             for (const soundConfig of this.soundConfig) {
                 if (soundConfig.url) {
                     await this.loadUrlBasedSound(soundConfig.label, soundConfig);
+                } else if (soundConfig.urls) {
+                    await this.loadUrlArrayBasedSound(soundConfig.label, soundConfig);
                 }
             }
         } catch (error) {
@@ -210,6 +215,24 @@ class BeatCountdownTimer {
             console.log(`${soundKey} sound loaded successfully`);
         } catch (e) {
             console.warn(`Failed to load ${soundKey} from URL:`, e);
+            console.log(`Using fallback generated ${soundKey} sound`);
+        }
+    }
+    
+    async loadUrlArrayBasedSound(soundKey, soundConfig) {
+        try {
+            this.audioBuffers[soundKey] = [];
+            this.soundAlternationCounters[soundKey] = 0;
+            
+            // Load all URLs in the array
+            for (const url of soundConfig.urls) {
+                const buffer = await this.loadAudioBuffer(url);
+                this.audioBuffers[soundKey].push(buffer);
+            }
+            
+            console.log(`${soundKey} sounds loaded successfully (${soundConfig.urls.length} files)`);
+        } catch (e) {
+            console.warn(`Failed to load ${soundKey} from URLs:`, e);
             console.log(`Using fallback generated ${soundKey} sound`);
         }
     }
@@ -545,9 +568,22 @@ class BeatCountdownTimer {
         }
         
         if (soundConfig.url) {
-            // URL-based sound: try to use loaded audio buffer first
+            // Single URL-based sound: try to use loaded audio buffer first
             if (this.audioBuffers[this.selectedSound]) {
                 this.playAudioBuffer(this.audioBuffers[this.selectedSound], scheduledTime);
+            } else {
+                // Fall back to generated sound
+                this[soundConfig.generator](scheduledTime);
+            }
+        } else if (soundConfig.urls) {
+            // Multiple URL-based sound: alternate between loaded audio buffers
+            if (this.audioBuffers[this.selectedSound] && this.audioBuffers[this.selectedSound].length > 0) {
+                const currentIndex = this.soundAlternationCounters[this.selectedSound] % this.audioBuffers[this.selectedSound].length;
+                const currentBuffer = this.audioBuffers[this.selectedSound][currentIndex];
+                this.playAudioBuffer(currentBuffer, scheduledTime);
+                
+                // Increment alternation counter for next time
+                this.soundAlternationCounters[this.selectedSound]++;
             } else {
                 // Fall back to generated sound
                 this[soundConfig.generator](scheduledTime);
