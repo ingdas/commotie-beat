@@ -34,6 +34,10 @@ class BeatCountdownTimer {
                 label: 'Kick Drum'
             },
             {
+                url: './dream.wav',
+                label: 'Dreamy'
+            },
+            {
                 generator: 'scheduleHeartbeatAudio',
                 label: 'Heart Beat'
             },
@@ -47,15 +51,12 @@ class BeatCountdownTimer {
             },
             {
                 generator: 'scheduleBellAudio',
-                label: 'Bell'
+                label: 'Alarm'
             }
         ];
         
-        // Audio buffers for URL-based sounds
-        this.audioBuffers = {
-            clock: [],
-            metronome: null
-        };
+        // Audio buffers for URL-based sounds - dynamically populated based on soundConfig
+        this.audioBuffers = {};
         
         // Alternation counters for sounds with multiple URLs
         this.soundAlternationCounters = {};
@@ -685,8 +686,13 @@ class BeatCountdownTimer {
     
     scheduleClockAudio(scheduledTime) {
         // Use WAV file if available, otherwise fall back to generated sound
-        if (this.audioBuffers.clock) {
-            this.playAudioBuffer(this.audioBuffers.clock, scheduledTime);
+        if (this.audioBuffers['Clock'] && this.audioBuffers['Clock'].length > 0) {
+            const currentIndex = this.soundAlternationCounters['Clock'] % this.audioBuffers['Clock'].length;
+            const currentBuffer = this.audioBuffers['Clock'][currentIndex];
+            this.playAudioBuffer(currentBuffer, scheduledTime);
+            
+            // Increment alternation counter for next time
+            this.soundAlternationCounters['Clock']++;
         } else {
             // Fallback to generated clock tick sound
             const oscillator = this.audioContext.createOscillator();
@@ -716,38 +722,6 @@ class BeatCountdownTimer {
         }
     }
     
-    scheduleMetronomeAudio(scheduledTime) {
-        // Use WAV file if available, otherwise fall back to generated sound
-        if (this.audioBuffers.metronome) {
-            this.playAudioBuffer(this.audioBuffers.metronome, scheduledTime);
-        } else {
-            // Fallback to generated metronome click sound
-            const oscillator = this.audioContext.createOscillator();
-            const gainNode = this.audioContext.createGain();
-            const filter = this.audioContext.createBiquadFilter();
-            
-            oscillator.connect(filter);
-            filter.connect(gainNode);
-            gainNode.connect(this.audioContext.destination);
-            
-            // Metronome character - clean, precise
-            filter.type = 'bandpass';
-            filter.frequency.setValueAtTime(2000, scheduledTime);
-            filter.Q.setValueAtTime(5, scheduledTime);
-            
-            oscillator.frequency.setValueAtTime(2000, scheduledTime);
-            
-            // Clean, precise envelope
-            const volumeMultiplier = this.volume / 100;
-            gainNode.gain.setValueAtTime(0, scheduledTime);
-            gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.7, scheduledTime + 0.01);
-            gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.15);
-            
-            oscillator.start(scheduledTime);
-            oscillator.stop(scheduledTime + 0.15);
-        }
-    }
-    
     scheduleBellAudio(scheduledTime) {
         // Create a bell sound
         const oscillator = this.audioContext.createOscillator();
@@ -768,7 +742,7 @@ class BeatCountdownTimer {
         // Bell envelope - quick attack, long decay
         const volumeMultiplier = this.volume / 100;
         gainNode.gain.setValueAtTime(0, scheduledTime);
-        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, scheduledTime + 0.02);
+        gainNode.gain.linearRampToValueAtTime(volumeMultiplier * 0.4, scheduledTime + 0.02);
         gainNode.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 1.0);
         
         oscillator.start(scheduledTime);
@@ -934,7 +908,7 @@ class BeatCountdownTimer {
         this.bpm = parseInt(this.initialBpmInput.value);
         this.isHeartbeatMode = false;
         this.beatFrequency = 1;
-        this.selectedSound = 'kick';
+        this.selectedSound = 'Thump';
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
