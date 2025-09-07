@@ -12,7 +12,7 @@ class BeatCountdownTimer {
         this.timerInterval = null;
         this.isHeartbeatMode = false;
         this.beatFrequency = 1; // Default: every beat
-        this.selectedSound = 'kick'; // Default sound type
+        this.selectedSound = 'Thump'; // Default sound type
         
         // MIDI-like scheduling system
         this.animationFrameId = null;
@@ -21,18 +21,51 @@ class BeatCountdownTimer {
         this.nextBeatTime = 0;
         this.beatInterval = 0;
         this.lastScheduledBeat = 0;
-        this.lookaheadTime = 0.1; // Schedule beats 100ms ahead
+        this.lookaheadTime = 0.5; // Schedule beats ahead (seconds)
         
-        // Audio buffers for WAV files
+        // Sound configuration data structure
+        this.soundConfig = [
+            {
+                generator: 'scheduleKickDrumAudio',
+                label: 'Thump'
+            },
+            {
+                url: './kickdrum.wav',
+                label: 'Kick Drum'
+            },
+            {
+                generator: 'scheduleHeartbeatAudio',
+                label: 'Heart Beat'
+            },
+            {
+                generator: 'scheduleClockAudio',
+                label: 'Clock'
+            },
+            {
+                url: './metronome.wav',
+                label: 'Metronome'
+            },
+            {
+                generator: 'scheduleBellAudio',
+                label: 'Bell'
+            }
+        ];
+        
+        // Audio buffers for URL-based sounds
         this.audioBuffers = {
             clock: null,
             metronome: null
         };
         
         this.initializeElements();
+        this.generateSoundButtons();
         this.setupEventListeners();
         this.initializeAudio();
         this.loadAudioFiles();
+        
+        // Log available sounds for debugging
+        console.log('Available sounds:', this.getAvailableSounds());
+        console.log('Sound configuration:', this.soundConfig);
     }
     
     initializeElements() {
@@ -49,11 +82,8 @@ class BeatCountdownTimer {
         this.currentBpm = document.getElementById('currentBpm');
         this.beatIndicator = document.getElementById('beatIndicator');
 
-        this.kickBtn = document.getElementById('kickBtn');
-        this.heartbeatBtn = document.getElementById('heartbeatBtn');
-        this.clockBtn = document.getElementById('clockBtn');
-        this.metronomeBtn = document.getElementById('metronomeBtn');
-        this.bellBtn = document.getElementById('bellBtn');
+        // Sound buttons will be generated dynamically
+        this.soundButtons = {};
         this.freq1Btn = document.getElementById('freq1Btn');
         this.freq2Btn = document.getElementById('freq2Btn');
         this.freq3Btn = document.getElementById('freq3Btn');
@@ -69,18 +99,43 @@ class BeatCountdownTimer {
         this.currentVolume = document.getElementById('currentVolume');
     }
     
+    generateSoundButtons() {
+        const soundButtonsContainer = document.querySelector('.sound-buttons');
+        
+        // Clear existing buttons
+        soundButtonsContainer.innerHTML = '';
+        
+        // Generate buttons from sound configuration
+        this.soundConfig.forEach(soundConfig => {
+            const button = document.createElement('button');
+            button.id = `${soundConfig.label.replace(/\s+/g, '')}Btn`;
+            button.className = 'sound-btn';
+            button.textContent = soundConfig.label;
+            button.dataset.soundType = soundConfig.label;
+            
+            // Set first button as active by default
+            if (soundConfig.label === this.selectedSound) {
+                button.classList.add('active');
+            }
+            
+            soundButtonsContainer.appendChild(button);
+            this.soundButtons[soundConfig.label] = button;
+        });
+    }
+    
     setupEventListeners() {
         this.startBtn.addEventListener('click', () => this.startCountdown());
         this.stopBtn.addEventListener('click', () => this.toggleStopResume());
         this.resetBtn.addEventListener('click', () => this.resetCountdown());
 
         
-        // Sound selection controls
-        this.kickBtn.addEventListener('click', () => this.setSoundType('kick'));
-        this.heartbeatBtn.addEventListener('click', () => this.setSoundType('heartbeat'));
-        this.clockBtn.addEventListener('click', () => this.setSoundType('clock'));
-        this.metronomeBtn.addEventListener('click', () => this.setSoundType('metronome'));
-        this.bellBtn.addEventListener('click', () => this.setSoundType('bell'));
+        // Sound selection controls - use event delegation for dynamic buttons
+        document.querySelector('.sound-buttons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sound-btn')) {
+                const soundType = e.target.dataset.soundType;
+                this.setSoundType(soundType);
+            }
+        });
         
         // Beat frequency controls
         this.freq1Btn.addEventListener('click', () => this.setBeatFrequency(1));
@@ -138,46 +193,24 @@ class BeatCountdownTimer {
         if (!this.audioContext) return;
         
         try {
-            const clockUrl = 'https://freesound.org/data/previews/316/316847_5123451-lq.mp3';
-            const clockUrlAlt = 'https://archive.org/download/ClockTickingSound/clock-ticking.wav';
-            
-            const metronomeUrl = './metronome.wav';
-            const metronomeUrlAlt = 'https://archive.org/download/MetronomeClickSound/metronome-click.wav';
-            
-            // Try to load clock sound
-            try {
-                this.audioBuffers.clock = await this.loadAudioBuffer(clockUrl);
-                console.log('Clock sound loaded successfully');
-            } catch (e) {
-                console.warn('Failed to load clock sound from primary URL, trying alternative...');
-                try {
-                    this.audioBuffers.clock = await this.loadAudioBuffer(clockUrlAlt);
-                    console.log('Clock sound loaded from alternative URL');
-                } catch (e2) {
-                    console.warn('Failed to load clock sound from alternative URL:', e2);
-                    // If both fail, we'll use the fallback generated sound
-                    console.log('Using fallback generated clock sound');
+            // Load URL-based sounds from configuration
+            for (const soundConfig of this.soundConfig) {
+                if (soundConfig.url) {
+                    await this.loadUrlBasedSound(soundConfig.label, soundConfig);
                 }
             }
-            
-            // Try to load metronome sound
-            try {
-                this.audioBuffers.metronome = await this.loadAudioBuffer(metronomeUrl);
-                console.log('Metronome sound loaded successfully');
-            } catch (e) {
-                console.warn('Failed to load metronome sound from primary URL, trying alternative...');
-                try {
-                    this.audioBuffers.metronome = await this.loadAudioBuffer(metronomeUrlAlt);
-                    console.log('Metronome sound loaded from alternative URL');
-                } catch (e2) {
-                    console.warn('Failed to load metronome sound from alternative URL:', e2);
-                    // If both fail, we'll use the fallback generated sound
-                    console.log('Using fallback generated metronome sound');
-                }
-            }
-            
         } catch (error) {
             console.error('Error loading audio files:', error);
+        }
+    }
+    
+    async loadUrlBasedSound(soundKey, soundConfig) {
+        try {
+            this.audioBuffers[soundKey] = await this.loadAudioBuffer(soundConfig.url);
+            console.log(`${soundKey} sound loaded successfully`);
+        } catch (e) {
+            console.warn(`Failed to load ${soundKey} from URL:`, e);
+            console.log(`Using fallback generated ${soundKey} sound`);
         }
     }
     
@@ -503,24 +536,25 @@ class BeatCountdownTimer {
     }
     
     scheduleBeatAudio(scheduledTime) {
-        switch(this.selectedSound) {
-            case 'kick':
-                this.scheduleKickDrumAudio(scheduledTime);
-                break;
-            case 'heartbeat':
-                this.scheduleHeartbeatAudio(scheduledTime);
-                break;
-            case 'clock':
-                this.scheduleClockAudio(scheduledTime);
-                break;
-            case 'metronome':
-                this.scheduleMetronomeAudio(scheduledTime);
-                break;
-            case 'bell':
-                this.scheduleBellAudio(scheduledTime);
-                break;
-            default:
-                this.scheduleKickDrumAudio(scheduledTime);
+        const soundConfig = this.soundConfig.find(sound => sound.label === this.selectedSound);
+        
+        if (!soundConfig) {
+            console.warn(`Unknown sound type: ${this.selectedSound}, falling back to Thump`);
+            this.scheduleKickDrumAudio(scheduledTime);
+            return;
+        }
+        
+        if (soundConfig.url) {
+            // URL-based sound: try to use loaded audio buffer first
+            if (this.audioBuffers[this.selectedSound]) {
+                this.playAudioBuffer(this.audioBuffers[this.selectedSound], scheduledTime);
+            } else {
+                // Fall back to generated sound
+                this[soundConfig.generator](scheduledTime);
+            }
+        } else if (soundConfig.generator) {
+            // Function-based sound: use the generator function
+            this[soundConfig.generator](scheduledTime);
         }
     }
     
@@ -761,32 +795,30 @@ class BeatCountdownTimer {
     
 
     
+    getAvailableSounds() {
+        return this.soundConfig.map(sound => sound.label);
+    }
+    
+    getSoundInfo(soundType) {
+        return this.soundConfig.find(sound => sound.label === soundType) || null;
+    }
+    
     setSoundType(soundType) {
+        // Validate sound type exists in configuration
+        const soundExists = this.soundConfig.some(sound => sound.label === soundType);
+        if (!soundExists) {
+            console.warn(`Invalid sound type: ${soundType}, falling back to Thump`);
+            soundType = 'Thump';
+        }
+        
         this.selectedSound = soundType;
         
-        // Update button states
-        this.kickBtn.classList.remove('active');
-        this.heartbeatBtn.classList.remove('active');
-        this.clockBtn.classList.remove('active');
-        this.metronomeBtn.classList.remove('active');
-        this.bellBtn.classList.remove('active');
+        // Remove active class from all sound buttons
+        Object.values(this.soundButtons).forEach(btn => btn.classList.remove('active'));
         
-        switch(soundType) {
-            case 'kick':
-                this.kickBtn.classList.add('active');
-                break;
-            case 'heartbeat':
-                this.heartbeatBtn.classList.add('active');
-                break;
-            case 'clock':
-                this.clockBtn.classList.add('active');
-                break;
-            case 'metronome':
-                this.metronomeBtn.classList.add('active');
-                break;
-            case 'bell':
-                this.bellBtn.classList.add('active');
-                break;
+        // Add active class to selected button
+        if (this.soundButtons[soundType]) {
+            this.soundButtons[soundType].classList.add('active');
         }
     }
     
@@ -872,7 +904,7 @@ class BeatCountdownTimer {
         this.updateSliderPosition(this.bpm);
 
         this.setBeatFrequency(1); // Reset to every beat
-        this.setSoundType('kick'); // Reset to kick drum
+        this.setSoundType('Thump'); // Reset to Thump
         this.showSetupPanel();
         // Reset button to Stop state
         this.stopBtn.textContent = 'Stop';
