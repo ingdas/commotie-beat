@@ -211,6 +211,12 @@ input[type="number"]:focus {
     justify-content: center;
 }
 
+.bpm-controls-section {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+}
+
 .bpm-controls {
     display: flex;
     align-items: center;
@@ -235,6 +241,22 @@ input[type="number"]:focus {
     transform: translateY(-1px);
     background: #667eea;
     color: white;
+}
+
+.set-bpm-btn {
+    background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+    color: white;
+    border-color: #38a169;
+    font-weight: 700;
+    min-width: 80px;
+    font-size: 0.9rem;
+}
+
+.set-bpm-btn:hover {
+    background: linear-gradient(135deg, #2f855a 0%, #276749 100%);
+    border-color: #2f855a;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(56, 161, 105, 0.3);
 }
 
 .bpm-slider {
@@ -418,5 +440,9 @@ input[type="number"]:focus {
     .bpm-btn {
         width: 100%;
         margin: 0.25rem 0;
+    }
+    
+    .set-bpm-btn {
+        order: -1; /* Put "Set to Required" button first on mobile */
     }
 }

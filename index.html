@@ -13,7 +13,7 @@
         <div class="setup-panel" id="setupPanel">
             <div class="input-group">
                 <label for="durationInput">Target Duration (minutes):</label>
-                <input type="number" id="durationInput" min="1" max="999" value="30" placeholder="Enter minutes" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                <input type="number" id="durationInput" min="1" max="999" value="10" placeholder="Enter minutes" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
             </div>
             
             <div class="input-group">
@@ -35,22 +35,26 @@
             </div>
             
             <div class="bpm-slider-container">
+                <div class="bpm-slider">
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-fill" id="sliderFill"></div>
+                        <div class="slider-thumb" id="sliderThumb"></div>
+                    </div>
+                    <div class="slider-labels">
+                        <span class="bpm-min">30</span>
+                        <span class="bpm-value" id="currentBpm">
+                            <span class="bpm-icon">⏱️</span>
+                            <span class="bpm-number">120</span>
+                        </span>
+                        <span class="bpm-max">200</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bpm-controls-section">
                 <div class="bpm-controls">
                     <button id="bpmDivideBtn" class="bpm-btn">/2</button>
-                    <div class="bpm-slider">
-                        <div class="slider-track" id="sliderTrack">
-                            <div class="slider-fill" id="sliderFill"></div>
-                            <div class="slider-thumb" id="sliderThumb"></div>
-                        </div>
-                        <div class="slider-labels">
-                            <span class="bpm-min">30</span>
-                            <span class="bpm-value" id="currentBpm">
-                                <span class="bpm-icon">⏱️</span>
-                                <span class="bpm-number">120</span>
-                            </span>
-                            <span class="bpm-max">200</span>
-                        </div>
-                    </div>
+                    <button id="setRequiredBpmBtn" class="bpm-btn set-bpm-btn">120 BPM</button>
                     <button id="bpmMultiplyBtn" class="bpm-btn">×2</button>
                 </div>
             </div>

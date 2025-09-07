@@ -50,6 +50,10 @@ class BeatCountdownTimer {
                 label: 'Metronome'
             },
             {
+                url: './water.mp3',
+                label: 'Water Drop'
+            },
+            {
                 generator: 'scheduleBellAudio',
                 label: 'Alarm'
             },
@@ -111,6 +115,7 @@ class BeatCountdownTimer {
         // BPM control buttons
         this.bpmMultiplyBtn = document.getElementById('bpmMultiplyBtn');
         this.bpmDivideBtn = document.getElementById('bpmDivideBtn');
+        this.setRequiredBpmBtn = document.getElementById('setRequiredBpmBtn');
     }
     
     generateSoundButtons() {
@@ -210,6 +215,7 @@ class BeatCountdownTimer {
         // BPM control buttons
         this.bpmMultiplyBtn.addEventListener('click', () => this.multiplyBpm());
         this.bpmDivideBtn.addEventListener('click', () => this.divideBpm());
+        this.setRequiredBpmBtn.addEventListener('click', () => this.setToRequiredBpm());
     }
     
     initializeAudio() {
@@ -510,6 +516,16 @@ class BeatCountdownTimer {
         
         // Update the required BPM display
         this.updateDisplay();
+    }
+    
+    setToRequiredBpm() {
+        // Calculate the BPM needed to finish exactly when timer reaches zero
+        const requiredBpm = Math.round((this.countdown * 60) / this.remainingTimeSeconds);
+        
+        // Clamp the required BPM to valid range
+        const clampedBpm = Math.max(30, Math.min(200, requiredBpm));
+        
+        this.setBpm(clampedBpm);
     }
     
     playBassDrum() {
@@ -990,6 +1006,9 @@ class BeatCountdownTimer {
         // Calculate the BPM needed to finish exactly when timer reaches zero
         const requiredBpm = Math.round((this.countdown * 60) / this.remainingTimeSeconds);
         this.requiredBpmDisplay.textContent = `Required BPM: ${requiredBpm}`;
+        
+        // Update the "Set to Required" button label with the actual required BPM
+        this.setRequiredBpmBtn.textContent = `${requiredBpm} BPM`;
     }
     
     triggerBeatAnimation() {
