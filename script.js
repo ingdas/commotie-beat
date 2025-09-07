@@ -12,6 +12,7 @@ class BeatCountdownTimer {
         this.timerInterval = null;
         this.isHeartbeatMode = false;
         this.selectedSound = 'Thump'; // Default sound type
+        this.selectedEndingSound = 'Silent'; // Default ending sound
         
         // MIDI-like scheduling system
         this.animationFrameId = null;
@@ -51,6 +52,15 @@ class BeatCountdownTimer {
             {
                 generator: 'scheduleBellAudio',
                 label: 'Alarm'
+            },
+            {
+                url: './boom.mp3',
+                label: 'Boom',
+                type: 'end'
+            },
+            {
+                label: 'Silent',
+                type: 'end'
             }
         ];
         
@@ -105,9 +115,11 @@ class BeatCountdownTimer {
     
     generateSoundButtons() {
         const soundButtonsContainer = document.querySelector('.sound-buttons');
+        const endingButtonsContainer = document.querySelector('.ending-buttons');
         
         // Clear existing buttons
         soundButtonsContainer.innerHTML = '';
+        endingButtonsContainer.innerHTML = '';
         
         // Generate buttons from sound configuration
         this.soundConfig.forEach(soundConfig => {
@@ -117,12 +129,21 @@ class BeatCountdownTimer {
             button.textContent = soundConfig.label;
             button.dataset.soundType = soundConfig.label;
             
-            // Set first button as active by default
-            if (soundConfig.label === this.selectedSound) {
-                button.classList.add('active');
+            // Separate regular sounds from ending sounds
+            if (soundConfig.type === 'end') {
+                // Add to ending buttons container
+                if (soundConfig.label === this.selectedEndingSound) {
+                    button.classList.add('active');
+                }
+                endingButtonsContainer.appendChild(button);
+            } else {
+                // Add to regular sound buttons container
+                if (soundConfig.label === this.selectedSound) {
+                    button.classList.add('active');
+                }
+                soundButtonsContainer.appendChild(button);
             }
             
-            soundButtonsContainer.appendChild(button);
             this.soundButtons[soundConfig.label] = button;
         });
     }
@@ -138,6 +159,14 @@ class BeatCountdownTimer {
             if (e.target.classList.contains('sound-btn')) {
                 const soundType = e.target.dataset.soundType;
                 this.setSoundType(soundType);
+            }
+        });
+        
+        // Ending selection controls - use event delegation for dynamic buttons
+        document.querySelector('.ending-buttons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sound-btn')) {
+                const soundType = e.target.dataset.soundType;
+                this.setEndingSoundType(soundType);
             }
         });
         
@@ -842,17 +871,46 @@ class BeatCountdownTimer {
     }
     
     setSoundType(soundType) {
-        // Validate sound type exists in configuration
-        const soundExists = this.soundConfig.some(sound => sound.label === soundType);
-        if (!soundExists) {
+        // Validate sound type exists in configuration and is not an ending sound
+        const soundConfig = this.soundConfig.find(sound => sound.label === soundType);
+        if (!soundConfig || soundConfig.type === 'end') {
             console.warn(`Invalid sound type: ${soundType}, falling back to Thump`);
             soundType = 'Thump';
         }
         
         this.selectedSound = soundType;
         
-        // Remove active class from all sound buttons
-        Object.values(this.soundButtons).forEach(btn => btn.classList.remove('active'));
+        // Remove active class from all regular sound buttons
+        const regularSounds = this.soundConfig.filter(sound => sound.type !== 'end');
+        regularSounds.forEach(sound => {
+            if (this.soundButtons[sound.label]) {
+                this.soundButtons[sound.label].classList.remove('active');
+            }
+        });
+        
+        // Add active class to selected button
+        if (this.soundButtons[soundType]) {
+            this.soundButtons[soundType].classList.add('active');
+        }
+    }
+    
+    setEndingSoundType(soundType) {
+        // Validate sound type exists in configuration and is an ending sound
+        const soundConfig = this.soundConfig.find(sound => sound.label === soundType);
+        if (!soundConfig || soundConfig.type !== 'end') {
+            console.warn(`Invalid ending sound type: ${soundType}, falling back to Silent`);
+            soundType = 'Silent';
+        }
+        
+        this.selectedEndingSound = soundType;
+        
+        // Remove active class from all ending sound buttons
+        const endingSounds = this.soundConfig.filter(sound => sound.type === 'end');
+        endingSounds.forEach(sound => {
+            if (this.soundButtons[sound.label]) {
+                this.soundButtons[sound.label].classList.remove('active');
+            }
+        });
         
         // Add active class to selected button
         if (this.soundButtons[soundType]) {
@@ -911,11 +969,13 @@ class BeatCountdownTimer {
         this.bpm = parseInt(this.initialBpmInput.value);
         this.isHeartbeatMode = false;
         this.selectedSound = 'Thump';
+        this.selectedEndingSound = 'Silent';
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
 
         this.setSoundType('Thump'); // Reset to Thump
+        this.setEndingSoundType('Silent'); // Reset to Silent
         this.showSetupPanel();
         // Reset button to Stop state
         this.stopBtn.textContent = 'Stop';
@@ -950,11 +1010,52 @@ class BeatCountdownTimer {
         this.setupPanel.style.display = 'block';
     }
     
+    playEndingSound() {
+        if (!this.audioContext) return;
+        
+        const soundConfig = this.soundConfig.find(sound => sound.label === this.selectedEndingSound);
+        
+        if (!soundConfig) {
+            console.warn(`Unknown ending sound type: ${this.selectedEndingSound}`);
+            return;
+        }
+        
+        // Don't play anything for Silent
+        if (this.selectedEndingSound === 'Silent') {
+            return;
+        }
+        
+        const scheduledTime = this.audioContext.currentTime;
+        
+        if (soundConfig.url) {
+            // Single URL-based sound: try to use loaded audio buffer first
+            if (this.audioBuffers[this.selectedEndingSound]) {
+                this.playAudioBuffer(this.audioBuffers[this.selectedEndingSound], scheduledTime);
+            } else {
+                console.warn(`Audio buffer not loaded for ending sound: ${this.selectedEndingSound}`);
+            }
+        } else if (soundConfig.urls) {
+            // Multiple URL-based sound: use first available buffer
+            if (this.audioBuffers[this.selectedEndingSound] && this.audioBuffers[this.selectedEndingSound].length > 0) {
+                const currentBuffer = this.audioBuffers[this.selectedEndingSound][0];
+                this.playAudioBuffer(currentBuffer, scheduledTime);
+            } else {
+                console.warn(`Audio buffers not loaded for ending sound: ${this.selectedEndingSound}`);
+            }
+        } else if (soundConfig.generator) {
+            // Function-based sound: use the generator function
+            this[soundConfig.generator](scheduledTime);
+        }
+    }
+    
     showCompletion() {
         this.countdownNumber.textContent = 'Done!';
         this.countdownNumber.style.color = '#48bb78';
         this.countdownNumber.style.textShadow = '0 4px 8px rgba(72, 187, 120, 0.3)';
         this.timerDisplay.textContent = '00:00';
+        
+        // Play ending sound
+        this.playEndingSound();
         
         setTimeout(() => {
             this.resetCountdown();
