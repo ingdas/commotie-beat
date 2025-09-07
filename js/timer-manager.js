@@ -380,15 +380,17 @@ class TimerManager {
         
         this.isDisabled = true;
         
-        // Stop the beat scheduling and countdown timer
+        // Stop only the beat scheduling (audio and visual beats)
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
             this.animationFrameId = null;
         }
-        if (this.timerInterval) {
-            clearInterval(this.timerInterval);
-            this.timerInterval = null;
-        }
+        
+        // Clear scheduled beats to prevent them from being processed when we resume
+        this.scheduledBeats = [];
+        this.scheduledVisualBeats = [];
+        
+        // Keep the countdown timer running - don't stop timerInterval
         
         // Notify UI
         if (this.callbacks.onTimerDisabled) {
@@ -412,15 +414,32 @@ class TimerManager {
         this.isDisabled = false;
         this.disableTimeout = null;
         
-        // Resume the timer systems
+        // Resume beat scheduling with proper timing recalculation
         const selectedSound = this.getCurrentSound ? this.getCurrentSound() : 'Thump';
-        this.startTimer(selectedSound);
-        this.startCountdownTimer();
+        this.resumeBeatScheduling(selectedSound);
+        // Don't restart startCountdownTimer() - it should still be running
         
         // Notify UI
         if (this.callbacks.onTimerEnabled) {
             this.callbacks.onTimerEnabled();
         }
+    }
+    
+    /**
+     * Resume beat scheduling with proper timing recalculation
+     */
+    resumeBeatScheduling(selectedSound) {
+        // Recalculate timing based on current time and BPM
+        const currentTime = this.audioManager.getCurrentTime();
+        this.beatInterval = 60 / this.bpm;
+        
+        // Calculate the next beat time based on current time
+        // This ensures we don't have a gap or jump in timing
+        const timeSinceLastBeat = (currentTime - this.startTime) % this.beatInterval;
+        this.nextBeatTime = currentTime + (this.beatInterval - timeSinceLastBeat);
+        
+        // Restart the animation frame loop
+        this.animationFrameId = requestAnimationFrame(() => this.schedulerLoop(selectedSound));
     }
     
     /**
