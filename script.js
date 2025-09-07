@@ -307,6 +307,7 @@ class BeatCountdownTimer {
                 // Clear existing scheduled beats and reschedule with new timing
                 this.scheduledBeats = [];
                 this.scheduledVisualBeats = [];
+                // Don't recalculate countdown - maintain the current progression
                 // Set next beat time to current time + beat interval to avoid immediate duplicate
                 this.nextBeatTime = this.audioContext.currentTime + this.beatInterval;
             }
@@ -484,6 +485,7 @@ class BeatCountdownTimer {
             // Clear existing scheduled beats and reschedule with new timing
             this.scheduledBeats = [];
             this.scheduledVisualBeats = [];
+            // Don't recalculate countdown - maintain the current progression
             // Set next beat time to current time + beat interval to avoid immediate duplicate
             this.nextBeatTime = this.audioContext.currentTime + this.beatInterval;
         }
