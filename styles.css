@@ -27,9 +27,51 @@ body {
 
 h1 {
     color: #4a5568;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     font-size: 2.5rem;
     font-weight: 700;
+}
+
+.midi-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    border: 2px solid #e2e8f0;
+    transition: all 0.3s ease;
+}
+
+.midi-status.connected {
+    border-color: #38a169;
+    background: rgba(56, 161, 105, 0.1);
+}
+
+.midi-status.disconnected {
+    border-color: #e53e3e;
+    background: rgba(229, 62, 62, 0.1);
+}
+
+.midi-indicator {
+    font-size: 1.2rem;
+    transition: all 0.3s ease;
+}
+
+.midi-status.connected .midi-indicator {
+    color: #38a169;
+}
+
+.midi-status.disconnected .midi-indicator {
+    color: #e53e3e;
+}
+
+.midi-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #4a5568;
 }
 
 .setup-panel, .countdown-panel {

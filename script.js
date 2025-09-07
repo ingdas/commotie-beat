@@ -79,6 +79,7 @@ class BeatCountdownTimer {
         this.setupEventListeners();
         this.initializeAudio();
         this.loadAudioFiles();
+        this.initializeMIDI();
         
         // Log available sounds for debugging
         console.log('Available sounds:', this.getAvailableSounds());
@@ -116,6 +117,11 @@ class BeatCountdownTimer {
         this.bpmMultiplyBtn = document.getElementById('bpmMultiplyBtn');
         this.bpmDivideBtn = document.getElementById('bpmDivideBtn');
         this.setRequiredBpmBtn = document.getElementById('setRequiredBpmBtn');
+        
+        // MIDI status elements
+        this.midiStatus = document.getElementById('midiStatus');
+        this.midiIndicator = document.getElementById('midiIndicator');
+        this.midiText = document.getElementById('midiText');
     }
     
     generateSoundButtons() {
@@ -1079,6 +1085,149 @@ class BeatCountdownTimer {
         setTimeout(() => {
             this.resetCountdown();
         }, 2000);
+    }
+    
+    async initializeMIDI() {
+        // Check if Web MIDI API is supported
+        if (!navigator.requestMIDIAccess) {
+            console.warn('Web MIDI API not supported in this browser');
+            this.updateMIDIStatus(false, 'MIDI: Not Supported');
+            return;
+        }
+        
+        try {
+            // Request MIDI access
+            const midiAccess = await navigator.requestMIDIAccess();
+            console.log('MIDI access granted');
+            
+            // Set up MIDI input handlers
+            this.setupMIDIInputs(midiAccess);
+            
+            // Listen for MIDI device changes
+            midiAccess.onstatechange = (event) => {
+                console.log('MIDI device state changed:', event.port);
+                this.setupMIDIInputs(midiAccess);
+            };
+            
+        } catch (error) {
+            console.error('Failed to access MIDI:', error);
+            this.updateMIDIStatus(false, 'MIDI: Access Denied');
+        }
+    }
+    
+    setupMIDIInputs(midiAccess) {
+        // Clear existing handlers
+        this.midiInputs = [];
+        
+        // Set up handlers for all MIDI inputs
+        for (let input of midiAccess.inputs.values()) {
+            input.onmidimessage = (message) => this.handleMIDIMessage(message);
+            this.midiInputs.push(input);
+            console.log('MIDI input connected:', input.name);
+        }
+        
+        if (this.midiInputs.length === 0) {
+            console.log('No MIDI inputs found');
+            this.updateMIDIStatus(false, 'MIDI: No Devices');
+        } else {
+            this.updateMIDIStatus(true, `MIDI: ${this.midiInputs.length} Device(s)`);
+        }
+    }
+    
+    handleMIDIMessage(message) {
+        const [command, noteOrCC, velocity] = message.data;
+        
+        // Note ON messages (command 144 = 0x90)
+        if (command === 144 && velocity > 0) {
+            this.handleNoteON(noteOrCC);
+        }
+        // Control Change messages (command 176 = 0xB0)
+        else if (command === 176) {
+            this.handleControlChange(noteOrCC, velocity);
+        }
+    }
+    
+    handleNoteON(note) {
+        // Map MIDI notes to sound types
+        // G#2 = 44, A2 = 45, A#2 = 46, B2 = 47, C3 = 48, C#3 = 49, D3 = 50, D#3 = 51, E3 = 52, F3 = 53
+        const noteToSoundMap = {
+            44: 0, // G#2 -> Thump
+            45: 1, // A2 -> Kick Drum
+            46: 2, // A#2 -> Dreamy
+            47: 3, // B2 -> Heart Beat
+            48: 4, // C3 -> Clock
+            49: 5, // C#3 -> Metronome
+            50: 6, // D3 -> Water Drop
+            51: 7, // D#3 -> Alarm
+            52: 8, // E3 -> Boom
+            53: 9  // F3 -> Silent
+        };
+        
+        const soundIndex = noteToSoundMap[note];
+        if (soundIndex !== undefined && soundIndex < this.soundConfig.length) {
+            const soundType = this.soundConfig[soundIndex].label;
+            console.log(`MIDI Note ${note} -> Sound: ${soundType}`);
+            
+            // Set the sound type
+            if (this.soundConfig[soundIndex].type === 'end') {
+                this.setEndingSoundType(soundType);
+            } else {
+                this.setSoundType(soundType);
+            }
+        }
+    }
+    
+    handleControlChange(ccNumber, value) {
+        switch (ccNumber) {
+            case 20: // CC#20 -> BPM
+                this.handleBPMControl(value);
+                break;
+            case 21: // CC#21 -> Volume
+                this.handleVolumeControl(value);
+                break;
+        }
+    }
+    
+    handleBPMControl(value) {
+        if (value === 65) {
+            // Increase BPM
+            const newBpm = Math.min(200, this.bpm + 1);
+            this.setBpm(newBpm);
+            console.log(`MIDI CC#20: Increase BPM to ${newBpm}`);
+        } else if (value === 63) {
+            // Decrease BPM
+            const newBpm = Math.max(30, this.bpm - 1);
+            this.setBpm(newBpm);
+            console.log(`MIDI CC#20: Decrease BPM to ${newBpm}`);
+        }
+    }
+    
+    handleVolumeControl(value) {
+        if (value === 65) {
+            // Increase Volume
+            const newVolume = Math.min(100, this.volume + 1);
+            this.setVolume(newVolume);
+            console.log(`MIDI CC#22: Increase Volume to ${newVolume}`);
+        } else if (value === 63) {
+            // Decrease Volume
+            const newVolume = Math.max(20, this.volume - 1);
+            this.setVolume(newVolume);
+            console.log(`MIDI CC#21: Decrease Volume to ${newVolume}`);
+        }
+    }
+    
+    setVolume(newVolume) {
+        this.volume = newVolume;
+        this.volumeNumber.textContent = newVolume;
+        this.updateVolumeSliderPosition(newVolume);
+    }
+    
+    updateMIDIStatus(isConnected, text) {
+        if (this.midiStatus && this.midiIndicator && this.midiText) {
+            this.midiStatus.className = `midi-status ${isConnected ? 'connected' : 'disconnected'}`;
+            this.midiIndicator.textContent = isConnected ? '🎹' : '🔌';
+            this.midiText.textContent = text;
+        }
     }
 }
 
