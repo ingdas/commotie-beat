@@ -86,6 +86,15 @@ class MIDIManager {
      * Handle MIDI Note ON messages for sound selection
      */
     handleNoteON(note) {
+        // Special handling for G2 (note 43) - disable timer
+        if (note === 43) {
+            console.log(`MIDI Note ${note} (G2) -> Disable Timer`);
+            if (this.callbacks.disableTimer) {
+                this.callbacks.disableTimer();
+            }
+            return;
+        }
+        
         const soundConfig = this.soundConfig.getSoundByMidiNote(note);
         if (soundConfig) {
             console.log(`MIDI Note ${note} -> Sound: ${soundConfig.label}`);

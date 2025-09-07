@@ -37,6 +37,7 @@ class BeatCountdownTimer {
         return {
             startCountdown: () => this.startCountdown(),
             toggleStopResume: () => this.toggleStopResume(),
+            disableTimer: () => this.disableTimer(),
             resetCountdown: () => this.resetCountdown(),
             multiplyBpm: () => this.multiplyBpm(),
             divideBpm: () => this.divideBpm(),
@@ -56,6 +57,8 @@ class BeatCountdownTimer {
             onCountdownStopped: () => this.onCountdownStopped(),
             onCountdownResumed: () => this.onCountdownResumed(),
             onCountdownReset: () => this.onCountdownReset(),
+            onTimerDisabled: () => this.onTimerDisabled(),
+            onTimerEnabled: () => this.onTimerEnabled(),
             updateDisplay: (countdown, bpm, requiredBpm) => this.uiManager.updateDisplay(countdown, bpm, requiredBpm),
             updateTimerDisplay: (remainingTimeSeconds) => this.uiManager.updateTimerDisplay(remainingTimeSeconds),
             triggerBeatAnimation: () => this.uiManager.triggerBeatAnimation(),
@@ -76,6 +79,7 @@ class BeatCountdownTimer {
             decreaseBPM: () => this.decreaseBPM(),
             increaseVolume: () => this.increaseVolume(),
             decreaseVolume: () => this.decreaseVolume(),
+            disableTimer: () => this.disableTimer(),
             updateMIDIStatus: (isConnected, text) => this.uiManager.updateMIDIStatus(isConnected, text)
         };
     }
@@ -119,6 +123,13 @@ class BeatCountdownTimer {
             const selectedSound = this.uiManager.getSelectedSound();
             this.timerManager.resumeCountdown(selectedSound);
         }
+    }
+    
+    /**
+     * Disable timer for 5 seconds
+     */
+    disableTimer() {
+        this.timerManager.disableTimer();
     }
     
     /**
@@ -216,6 +227,20 @@ class BeatCountdownTimer {
      */
     onCountdownReset() {
         this.uiManager.updateStopButton(true);
+    }
+    
+    /**
+     * Handle timer disabled
+     */
+    onTimerDisabled() {
+        this.uiManager.updateDisableButton(true);
+    }
+    
+    /**
+     * Handle timer enabled
+     */
+    onTimerEnabled() {
+        this.uiManager.updateDisableButton(false);
     }
     
     /**

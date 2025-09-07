@@ -27,6 +27,10 @@ class TimerManager {
         
         // Timer interval for countdown display
         this.timerInterval = null;
+        
+        // Disable timer state
+        this.isDisabled = false;
+        this.disableTimeout = null;
     }
     
     /**
@@ -194,7 +198,12 @@ class TimerManager {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
         }
+        if (this.disableTimeout) {
+            clearTimeout(this.disableTimeout);
+            this.disableTimeout = null;
+        }
         this.isRunning = false;
+        this.isDisabled = false;
         
         // Notify UI
         if (this.callbacks.onCountdownStopped) {
@@ -362,6 +371,59 @@ class TimerManager {
     }
     
     /**
+     * Disable timer for 5 seconds
+     */
+    disableTimer() {
+        if (!this.isRunning || this.isDisabled) {
+            return; // Can't disable if not running or already disabled
+        }
+        
+        this.isDisabled = true;
+        
+        // Stop the beat scheduling and countdown timer
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+        
+        // Notify UI
+        if (this.callbacks.onTimerDisabled) {
+            this.callbacks.onTimerDisabled();
+        }
+        
+        // Re-enable after 5 seconds
+        this.disableTimeout = setTimeout(() => {
+            this.enableTimer();
+        }, 5000);
+    }
+    
+    /**
+     * Re-enable timer after disable period
+     */
+    enableTimer() {
+        if (!this.isDisabled) {
+            return; // Already enabled
+        }
+        
+        this.isDisabled = false;
+        this.disableTimeout = null;
+        
+        // Resume the timer systems
+        const selectedSound = this.getCurrentSound ? this.getCurrentSound() : 'Thump';
+        this.startTimer(selectedSound);
+        this.startCountdownTimer();
+        
+        // Notify UI
+        if (this.callbacks.onTimerEnabled) {
+            this.callbacks.onTimerEnabled();
+        }
+    }
+    
+    /**
      * Get current timer state
      */
     getState() {
@@ -372,6 +434,7 @@ class TimerManager {
             remainingTimeSeconds: this.remainingTimeSeconds,
             bpm: this.bpm,
             isRunning: this.isRunning,
+            isDisabled: this.isDisabled,
             requiredBpm: this.calculateRequiredBpm()
         };
     }

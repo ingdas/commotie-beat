@@ -32,6 +32,7 @@ class UIManager {
             initialBpmInput: document.getElementById('initialBpmInput'),
             startBtn: document.getElementById('startBtn'),
             stopBtn: document.getElementById('stopBtn'),
+            disableBtn: document.getElementById('disableBtn'),
             resetBtn: document.getElementById('resetBtn'),
             countdownNumber: document.getElementById('countdownNumber'),
             timerDisplay: document.getElementById('timerDisplay'),
@@ -118,6 +119,7 @@ class UIManager {
         // Main control buttons
         this.elements.startBtn.addEventListener('click', () => this.callbacks.startCountdown());
         this.elements.stopBtn.addEventListener('click', () => this.callbacks.toggleStopResume());
+        this.elements.disableBtn.addEventListener('click', () => this.callbacks.disableTimer());
         this.elements.resetBtn.addEventListener('click', () => this.callbacks.resetCountdown());
         
         // Sound selection controls - use event delegation for dynamic buttons
@@ -487,6 +489,21 @@ class UIManager {
             this.elements.stopBtn.textContent = 'Resume';
             this.elements.stopBtn.classList.remove('stop-btn');
             this.elements.stopBtn.classList.add('resume-btn');
+        }
+    }
+    
+    /**
+     * Update disable button state
+     */
+    updateDisableButton(isDisabled) {
+        if (isDisabled) {
+            this.elements.disableBtn.textContent = 'Disabled';
+            this.elements.disableBtn.disabled = true;
+            this.elements.disableBtn.classList.add('disabled');
+        } else {
+            this.elements.disableBtn.textContent = 'Disable 5s';
+            this.elements.disableBtn.disabled = false;
+            this.elements.disableBtn.classList.remove('disabled');
         }
     }
     
