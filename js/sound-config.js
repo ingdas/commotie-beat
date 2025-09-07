@@ -1,0 +1,128 @@
+/**
+ * Sound Configuration Module
+ * Defines all available sounds and their properties
+ */
+class SoundConfig {
+    constructor() {
+        this.sounds = [
+            {
+                generator: 'scheduleKickDrumAudio',
+                label: 'Thump'
+            },
+            {
+                url: './kickdrum.wav',
+                label: 'Kick Drum'
+            },
+            {
+                url: './dream.wav',
+                label: 'Dreamy'
+            },
+            {
+                generator: 'scheduleHeartbeatAudio',
+                label: 'Heart Beat'
+            },
+            {
+                urls: ['./clock1.wav', './clock2.wav'],
+                label: 'Clock'
+            },
+            {
+                url: './metronome.wav',
+                label: 'Metronome'
+            },
+            {
+                url: './water.mp3',
+                label: 'Water Drop'
+            },
+            {
+                generator: 'scheduleBellAudio',
+                label: 'Alarm'
+            },
+            {
+                url: './boom.mp3',
+                label: 'Boom',
+                type: 'end'
+            },
+            {
+                label: 'Silent',
+                type: 'end'
+            }
+        ];
+        
+        // MIDI note mappings for sound selection
+        this.midiNoteMap = {
+            44: 0, // G#2 -> Thump
+            45: 1, // A2 -> Kick Drum
+            46: 2, // A#2 -> Dreamy
+            47: 3, // B2 -> Heart Beat
+            48: 4, // C3 -> Clock
+            49: 5, // C#3 -> Metronome
+            50: 6, // D3 -> Water Drop
+            51: 7, // D#3 -> Alarm
+            52: 8, // E3 -> Boom
+            53: 9  // F3 -> Silent
+        };
+    }
+    
+    /**
+     * Get all available sound labels
+     */
+    getAvailableSounds() {
+        return this.sounds.map(sound => sound.label);
+    }
+    
+    /**
+     * Get sound configuration by label
+     */
+    getSoundInfo(soundType) {
+        return this.sounds.find(sound => sound.label === soundType) || null;
+    }
+    
+    /**
+     * Get regular sounds (not ending sounds)
+     */
+    getRegularSounds() {
+        return this.sounds.filter(sound => sound.type !== 'end');
+    }
+    
+    /**
+     * Get ending sounds only
+     */
+    getEndingSounds() {
+        return this.sounds.filter(sound => sound.type === 'end');
+    }
+    
+    /**
+     * Get sound by MIDI note
+     */
+    getSoundByMidiNote(note) {
+        const soundIndex = this.midiNoteMap[note];
+        if (soundIndex !== undefined && soundIndex < this.sounds.length) {
+            return this.sounds[soundIndex];
+        }
+        return null;
+    }
+    
+    /**
+     * Validate if a sound type exists and is of the specified type
+     */
+    validateSoundType(soundType, expectedType = null) {
+        const soundConfig = this.getSoundInfo(soundType);
+        if (!soundConfig) {
+            return false;
+        }
+        
+        if (expectedType === null) {
+            return true; // Any valid sound
+        }
+        
+        if (expectedType === 'end') {
+            return soundConfig.type === 'end';
+        }
+        
+        if (expectedType === 'regular') {
+            return soundConfig.type !== 'end';
+        }
+        
+        return false;
+    }
+}
