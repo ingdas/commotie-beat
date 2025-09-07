@@ -164,48 +164,6 @@ input[type="number"]:focus {
     border-color: #667eea;
 }
 
-.beat-frequency-controls {
-    margin: 1.5rem 0;
-    text-align: center;
-}
-
-.beat-frequency-controls label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #4a5568;
-    font-size: 1rem;
-}
-
-.frequency-buttons {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.freq-btn {
-    padding: 0.5rem 1rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    background: white;
-    color: #4a5568;
-}
-
-.freq-btn:hover {
-    border-color: #667eea;
-    transform: translateY(-1px);
-}
-
-.freq-btn.active {
-    background: #667eea;
-    color: white;
-    border-color: #667eea;
-}
 
 .countdown-display {
     margin-bottom: 2rem;
@@ -484,15 +442,6 @@ input[type="number"]:focus {
         margin: 0.25rem 0;
     }
     
-    .frequency-buttons {
-        flex-direction: column;
-        align-items: center;
-    }
-    
-    .freq-btn {
-        width: 100%;
-        margin: 0.25rem 0;
-    }
     
     .bpm-slider, .volume-slider {
         width: 250px;

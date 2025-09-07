@@ -11,7 +11,6 @@ class BeatCountdownTimer {
         this.remainingTimeSeconds = 0;
         this.timerInterval = null;
         this.isHeartbeatMode = false;
-        this.beatFrequency = 1; // Default: every beat
         this.selectedSound = 'Thump'; // Default sound type
         
         // MIDI-like scheduling system
@@ -89,10 +88,6 @@ class BeatCountdownTimer {
 
         // Sound buttons will be generated dynamically
         this.soundButtons = {};
-        this.freq1Btn = document.getElementById('freq1Btn');
-        this.freq2Btn = document.getElementById('freq2Btn');
-        this.freq3Btn = document.getElementById('freq3Btn');
-        this.freq4Btn = document.getElementById('freq4Btn');
         this.sliderTrack = document.getElementById('sliderTrack');
         this.sliderThumb = document.getElementById('sliderThumb');
         this.sliderFill = document.getElementById('sliderFill');
@@ -147,11 +142,6 @@ class BeatCountdownTimer {
             }
         });
         
-        // Beat frequency controls
-        this.freq1Btn.addEventListener('click', () => this.setBeatFrequency(1));
-        this.freq2Btn.addEventListener('click', () => this.setBeatFrequency(2));
-        this.freq3Btn.addEventListener('click', () => this.setBeatFrequency(3));
-        this.freq4Btn.addEventListener('click', () => this.setBeatFrequency(4));
         
         // Handle duration input - only clean non-numeric characters, validate on blur
         this.durationInput.addEventListener('input', (e) => {
@@ -561,11 +551,9 @@ class BeatCountdownTimer {
         this.scheduleBeats();
         this.animationFrameId = requestAnimationFrame(() => this.schedulerLoop());
         
-        // Play first beat immediately if it matches frequency
-        if (this.countdown % this.beatFrequency === 0) {
-            this.playBassDrum();
-            this.triggerBeatAnimation();
-        }
+        // Play first beat immediately
+        this.playBassDrum();
+        this.triggerBeatAnimation();
     }
     
     scheduleBeats() {
@@ -582,16 +570,14 @@ class BeatCountdownTimer {
                 beatNumber: beatNumber
             });
             
-            // Only schedule audio for beats that match the frequency
-            if (beatNumber % this.beatFrequency === 0) {
-                this.scheduledBeats.push({
-                    time: this.nextBeatTime,
-                    beatNumber: beatNumber
-                });
-                
-                // Schedule the audio
-                this.scheduleBeatAudio(this.nextBeatTime);
-            }
+            // Schedule audio for every beat
+            this.scheduledBeats.push({
+                time: this.nextBeatTime,
+                beatNumber: beatNumber
+            });
+            
+            // Schedule the audio
+            this.scheduleBeatAudio(this.nextBeatTime);
             
             this.nextBeatTime += this.beatInterval;
             this.countdown--;
@@ -875,30 +861,6 @@ class BeatCountdownTimer {
         }
     }
     
-    setBeatFrequency(frequency) {
-        this.beatFrequency = frequency;
-        
-        // Update button states
-        this.freq1Btn.classList.remove('active');
-        this.freq2Btn.classList.remove('active');
-        this.freq3Btn.classList.remove('active');
-        this.freq4Btn.classList.remove('active');
-        
-        switch(frequency) {
-            case 1:
-                this.freq1Btn.classList.add('active');
-                break;
-            case 2:
-                this.freq2Btn.classList.add('active');
-                break;
-            case 3:
-                this.freq3Btn.classList.add('active');
-                break;
-            case 4:
-                this.freq4Btn.classList.add('active');
-                break;
-        }
-    }
     
     toggleStopResume() {
         if (this.isRunning) {
@@ -950,13 +912,11 @@ class BeatCountdownTimer {
         this.remainingTimeSeconds = this.targetDurationMinutes * 60;
         this.bpm = parseInt(this.initialBpmInput.value);
         this.isHeartbeatMode = false;
-        this.beatFrequency = 1;
         this.selectedSound = 'Thump';
         this.updateDisplay();
         this.updateTimerDisplay();
         this.updateSliderPosition(this.bpm);
 
-        this.setBeatFrequency(1); // Reset to every beat
         this.setSoundType('Thump'); // Reset to Thump
         this.showSetupPanel();
         // Reset button to Stop state
