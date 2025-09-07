@@ -616,7 +616,7 @@ class BeatCountdownTimer {
         
         // Volume envelope for first beat
         gainNode1.gain.setValueAtTime(0, scheduledTime);
-        gainNode1.gain.linearRampToValueAtTime(volumeMultiplier * 0.8, scheduledTime + 0.02);
+        gainNode1.gain.linearRampToValueAtTime(volumeMultiplier * 2, scheduledTime + 0.02);
         gainNode1.gain.exponentialRampToValueAtTime(0.01, scheduledTime + 0.4);
         
         oscillator1.start(scheduledTime);
@@ -640,7 +640,7 @@ class BeatCountdownTimer {
         
         // Volume envelope for second beat (softer)
         gainNode2.gain.setValueAtTime(0, scheduledTime + secondBeatDelay);
-        gainNode2.gain.linearRampToValueAtTime(volumeMultiplier * 0.5, scheduledTime + secondBeatDelay + 0.02);
+        gainNode2.gain.linearRampToValueAtTime(volumeMultiplier * 1.5, scheduledTime + secondBeatDelay + 0.02);
         gainNode2.gain.exponentialRampToValueAtTime(0.01, scheduledTime + secondBeatDelay + 0.35);
         
         oscillator2.start(scheduledTime + secondBeatDelay);
