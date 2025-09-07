@@ -333,13 +333,21 @@ class BeatCountdownTimer {
         const applyBpmChange = () => {
             // Update the beat interval for MIDI-like scheduling
             if (this.isRunning) {
+                const oldBeatInterval = this.beatInterval;
                 this.beatInterval = 60 / this.bpm;
-                // Clear existing scheduled beats and reschedule with new timing
+                
+                // Clear scheduled beats to prevent duplicate audio when tempo changes
                 this.scheduledBeats = [];
                 this.scheduledVisualBeats = [];
-                // Don't recalculate countdown - maintain the current progression
-                // Set next beat time to current time + beat interval to avoid immediate duplicate
-                this.nextBeatTime = this.audioContext.currentTime + this.beatInterval;
+                
+                // Update nextBeatTime to maintain rhythm continuity
+                // Calculate how many beats have passed since the last scheduled beat
+                const currentTime = this.audioContext.currentTime;
+                const timeSinceLastBeat = currentTime - (this.nextBeatTime - oldBeatInterval);
+                const beatsSinceLastBeat = Math.floor(timeSinceLastBeat / this.beatInterval);
+                
+                // Set nextBeatTime to the next beat in the new tempo
+                this.nextBeatTime = currentTime + (this.beatInterval - (timeSinceLastBeat % this.beatInterval));
             }
             
             // Update the required BPM display
@@ -511,13 +519,21 @@ class BeatCountdownTimer {
         
         // Update the beat interval for MIDI-like scheduling
         if (this.isRunning) {
+            const oldBeatInterval = this.beatInterval;
             this.beatInterval = 60 / this.bpm;
-            // Clear existing scheduled beats and reschedule with new timing
+            
+            // Clear scheduled beats to prevent duplicate audio when tempo changes
             this.scheduledBeats = [];
             this.scheduledVisualBeats = [];
-            // Don't recalculate countdown - maintain the current progression
-            // Set next beat time to current time + beat interval to avoid immediate duplicate
-            this.nextBeatTime = this.audioContext.currentTime + this.beatInterval;
+            
+            // Update nextBeatTime to maintain rhythm continuity
+            // Calculate how many beats have passed since the last scheduled beat
+            const currentTime = this.audioContext.currentTime;
+            const timeSinceLastBeat = currentTime - (this.nextBeatTime - oldBeatInterval);
+            const beatsSinceLastBeat = Math.floor(timeSinceLastBeat / this.beatInterval);
+            
+            // Set nextBeatTime to the next beat in the new tempo
+            this.nextBeatTime = currentTime + (this.beatInterval - (timeSinceLastBeat % this.beatInterval));
         }
         
         // Update the required BPM display
