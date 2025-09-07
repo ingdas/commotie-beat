@@ -35,7 +35,6 @@
             </div>
             
             <div class="bpm-slider-container">
-                <label class="slider-label">BPM</label>
                 <div class="bpm-controls">
                     <button id="bpmDivideBtn" class="bpm-btn">/2</button>
                     <div class="bpm-slider">
@@ -45,7 +44,10 @@
                         </div>
                         <div class="slider-labels">
                             <span class="bpm-min">30</span>
-                            <span class="bpm-value" id="currentBpm">120</span>
+                            <span class="bpm-value" id="currentBpm">
+                                <span class="bpm-icon">⏱️</span>
+                                <span class="bpm-number">120</span>
+                            </span>
                             <span class="bpm-max">200</span>
                         </div>
                     </div>
@@ -54,7 +56,6 @@
             </div>
             
             <div class="volume-slider-container">
-                <label class="slider-label">Volume</label>
                 <div class="volume-slider">
                     <div class="slider-track" id="volumeSliderTrack">
                         <div class="slider-fill" id="volumeSliderFill"></div>
@@ -62,7 +63,10 @@
                     </div>
                     <div class="slider-labels">
                         <span class="volume-min">20</span>
-                        <span class="volume-value" id="currentVolume">50</span>
+                        <span class="volume-value" id="currentVolume">
+                            <span class="volume-icon">🔊</span>
+                            <span class="volume-number">50</span>
+                        </span>
                         <span class="volume-max">100</span>
                     </div>
                 </div>

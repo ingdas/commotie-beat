@@ -84,6 +84,7 @@ class BeatCountdownTimer {
         this.timerDisplay = document.getElementById('timerDisplay');
         this.requiredBpmDisplay = document.getElementById('requiredBpmDisplay');
         this.currentBpm = document.getElementById('currentBpm');
+        this.bpmNumber = document.querySelector('.bpm-number');
         this.beatIndicator = document.getElementById('beatIndicator');
 
         // Sound buttons will be generated dynamically
@@ -101,6 +102,7 @@ class BeatCountdownTimer {
         this.volumeSliderThumb = document.getElementById('volumeSliderThumb');
         this.volumeSliderFill = document.getElementById('volumeSliderFill');
         this.currentVolume = document.getElementById('currentVolume');
+        this.volumeNumber = document.querySelector('.volume-number');
         
         // BPM control buttons
         this.bpmMultiplyBtn = document.getElementById('bpmMultiplyBtn');
@@ -294,7 +296,7 @@ class BeatCountdownTimer {
             const clampedBpm = Math.max(30, Math.min(200, newBpm));
             
             this.bpm = clampedBpm;
-            this.currentBpm.textContent = clampedBpm;
+            this.bpmNumber.textContent = clampedBpm;
             this.updateSliderPosition(clampedBpm);
         };
         
@@ -385,7 +387,7 @@ class BeatCountdownTimer {
             const clampedVolume = Math.max(20, Math.min(100, newVolume));
             
             this.volume = clampedVolume;
-            this.currentVolume.textContent = clampedVolume;
+            this.volumeNumber.textContent = clampedVolume;
             this.updateVolumeSliderPosition(clampedVolume);
         };
         
@@ -471,7 +473,7 @@ class BeatCountdownTimer {
     
     setBpm(newBpm) {
         this.bpm = newBpm;
-        this.currentBpm.textContent = newBpm;
+        this.bpmNumber.textContent = newBpm;
         this.updateSliderPosition(newBpm);
         
         // Update the beat interval for MIDI-like scheduling
@@ -959,7 +961,7 @@ class BeatCountdownTimer {
     
     updateDisplay() {
         this.countdownNumber.textContent = this.countdown;
-        this.currentBpm.textContent = this.bpm;
+        this.bpmNumber.textContent = this.bpm;
         
         // Calculate the BPM needed to finish exactly when timer reaches zero
         const requiredBpm = Math.round((this.countdown * 60) / this.remainingTimeSeconds);
