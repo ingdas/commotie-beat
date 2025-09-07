@@ -35,20 +35,26 @@
             </div>
             
             <div class="bpm-slider-container">
-                <div class="bpm-slider">
-                    <div class="slider-track" id="sliderTrack">
-                        <div class="slider-fill" id="sliderFill"></div>
-                        <div class="slider-thumb" id="sliderThumb"></div>
+                <label class="slider-label">BPM</label>
+                <div class="bpm-controls">
+                    <button id="bpmDivideBtn" class="bpm-btn">/2</button>
+                    <div class="bpm-slider">
+                        <div class="slider-track" id="sliderTrack">
+                            <div class="slider-fill" id="sliderFill"></div>
+                            <div class="slider-thumb" id="sliderThumb"></div>
+                        </div>
+                        <div class="slider-labels">
+                            <span class="bpm-min">30</span>
+                            <span class="bpm-value" id="currentBpm">120</span>
+                            <span class="bpm-max">200</span>
+                        </div>
                     </div>
-                    <div class="slider-labels">
-                        <span class="bpm-min">30</span>
-                        <span class="bpm-value" id="currentBpm">120</span>
-                        <span class="bpm-max">200</span>
-                    </div>
+                    <button id="bpmMultiplyBtn" class="bpm-btn">×2</button>
                 </div>
             </div>
             
             <div class="volume-slider-container">
+                <label class="slider-label">Volume</label>
                 <div class="volume-slider">
                     <div class="slider-track" id="volumeSliderTrack">
                         <div class="slider-fill" id="volumeSliderFill"></div>

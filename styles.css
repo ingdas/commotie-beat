@@ -250,7 +250,42 @@ input[type="number"]:focus {
 .bpm-slider-container {
     margin: 2rem 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.slider-label {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #4a5568;
+    margin-bottom: 0.5rem;
+}
+
+.bpm-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.bpm-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: white;
+    color: #4a5568;
+    min-width: 50px;
+}
+
+.bpm-btn:hover {
+    border-color: #667eea;
+    transform: translateY(-1px);
+    background: #667eea;
+    color: white;
 }
 
 .bpm-slider {
@@ -326,7 +361,9 @@ input[type="number"]:focus {
 .volume-slider-container {
     margin: 1rem 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .volume-slider {
@@ -444,5 +481,15 @@ input[type="number"]:focus {
     
     .bpm-slider, .volume-slider {
         width: 250px;
+    }
+    
+    .bpm-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .bpm-btn {
+        width: 100%;
+        margin: 0.25rem 0;
     }
 }

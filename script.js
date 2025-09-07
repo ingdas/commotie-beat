@@ -101,6 +101,10 @@ class BeatCountdownTimer {
         this.volumeSliderThumb = document.getElementById('volumeSliderThumb');
         this.volumeSliderFill = document.getElementById('volumeSliderFill');
         this.currentVolume = document.getElementById('currentVolume');
+        
+        // BPM control buttons
+        this.bpmMultiplyBtn = document.getElementById('bpmMultiplyBtn');
+        this.bpmDivideBtn = document.getElementById('bpmDivideBtn');
     }
     
     generateSoundButtons() {
@@ -182,6 +186,10 @@ class BeatCountdownTimer {
         
         // Volume Slider functionality
         this.setupVolumeSlider();
+        
+        // BPM control buttons
+        this.bpmMultiplyBtn.addEventListener('click', () => this.multiplyBpm());
+        this.bpmDivideBtn.addEventListener('click', () => this.divideBpm());
     }
     
     initializeAudio() {
@@ -449,6 +457,33 @@ class BeatCountdownTimer {
         
         this.volumeSliderThumb.style.left = `${percentage}%`;
         this.volumeSliderFill.style.width = `${percentage}%`;
+    }
+    
+    multiplyBpm() {
+        const newBpm = Math.min(200, this.bpm * 2);
+        this.setBpm(newBpm);
+    }
+    
+    divideBpm() {
+        const newBpm = Math.max(30, Math.round(this.bpm / 2));
+        this.setBpm(newBpm);
+    }
+    
+    setBpm(newBpm) {
+        this.bpm = newBpm;
+        this.currentBpm.textContent = newBpm;
+        this.updateSliderPosition(newBpm);
+        
+        // Update the beat interval for MIDI-like scheduling
+        if (this.isRunning) {
+            this.beatInterval = 60 / this.bpm;
+            // Clear existing scheduled beats and reschedule with new timing
+            this.scheduledBeats = [];
+            this.nextBeatTime = this.audioContext.currentTime;
+        }
+        
+        // Update the required BPM display
+        this.updateDisplay();
     }
     
     playBassDrum() {
