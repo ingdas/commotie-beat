@@ -366,43 +366,6 @@ input[type="number"]:focus {
     gap: 1rem;
 }
 
-.visualizer {
-    margin-top: 2rem;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.beat-indicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: #e2e8f0;
-    transition: all 0.1s ease;
-}
-
-.beat-indicator.active {
-    background: #e53e3e;
-    transform: scale(1.5);
-    box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
-    animation: kickPulse 0.3s ease-out;
-}
-
-@keyframes kickPulse {
-    0% {
-        transform: scale(1);
-        box-shadow: 0 0 0 rgba(229, 62, 62, 0);
-    }
-    50% {
-        transform: scale(2);
-        box-shadow: 0 0 30px rgba(229, 62, 62, 0.8);
-    }
-    100% {
-        transform: scale(1.5);
-        box-shadow: 0 0 20px rgba(229, 62, 62, 0.6);
-    }
-}
 
 @media (max-width: 600px) {
     .container {

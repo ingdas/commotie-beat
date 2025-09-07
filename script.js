@@ -84,7 +84,6 @@ class BeatCountdownTimer {
         this.requiredBpmDisplay = document.getElementById('requiredBpmDisplay');
         this.currentBpm = document.getElementById('currentBpm');
         this.bpmNumber = document.querySelector('.bpm-number');
-        this.beatIndicator = document.getElementById('beatIndicator');
 
         // Sound buttons will be generated dynamically
         this.soundButtons = {};
@@ -880,7 +879,6 @@ class BeatCountdownTimer {
             this.timerInterval = null;
         }
         this.isRunning = false;
-        this.beatIndicator.classList.remove('active');
         this.stopBtn.textContent = 'Resume';
         this.stopBtn.classList.remove('stop-btn');
         this.stopBtn.classList.add('resume-btn');
@@ -936,11 +934,9 @@ class BeatCountdownTimer {
     
     triggerBeatAnimation() {
         this.countdownNumber.classList.add('beat');
-        this.beatIndicator.classList.add('active');
         
         setTimeout(() => {
             this.countdownNumber.classList.remove('beat');
-            this.beatIndicator.classList.remove('active');
         }, 200);
     }
     
