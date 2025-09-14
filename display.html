@@ -196,6 +196,13 @@
             updateConnectionStatus(status, text) {
                 this.elements.connectionStatus.className = `connection-status ${status}`;
                 this.elements.connectionStatus.textContent = text;
+                
+                // Hide connection status when connected
+                if (status === 'connected') {
+                    this.elements.connectionStatus.style.display = 'none';
+                } else {
+                    this.elements.connectionStatus.style.display = 'block';
+                }
             }
             
             updateDisplay(data) {
