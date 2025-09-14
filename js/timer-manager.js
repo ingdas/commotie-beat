@@ -115,8 +115,11 @@ class TimerManager {
                 beatNumber: beatNumber
             });
             
-            // Schedule the audio with current sound
-            this.audioManager.scheduleBeatAudio(currentSound, this.nextBeatTime);
+            // Only schedule audio if this is not the final beat (countdown > 0 after decrement)
+            // The final beat (countdown 0) should not play the selected sound since ending sound will play
+            if (this.countdown > 1) {
+                this.audioManager.scheduleBeatAudio(currentSound, this.nextBeatTime);
+            }
             
             this.nextBeatTime += this.beatInterval;
             this.countdown--;
