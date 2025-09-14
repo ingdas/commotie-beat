@@ -72,8 +72,12 @@ class MIDIManager {
     handleMIDIMessage(message) {
         const [command, noteOrCC, velocity] = message.data;
         
+        // Real-time messages (0xF8-0xFF)
+        if (command >= 248) {
+            this.handleRealTimeMessage(command);
+        }
         // Note ON messages (command 144 = 0x90)
-        if (command === 144 && velocity > 0) {
+        else if (command === 144 && velocity > 0) {
             this.handleNoteON(noteOrCC);
         }
         // Control Change messages (command 176 = 0xB0)
@@ -161,6 +165,38 @@ class MIDIManager {
                 this.callbacks.decreaseVolume();
             }
             console.log(`MIDI CC#21: Decrease Volume`);
+        }
+    }
+    
+    /**
+     * Handle MIDI real-time messages
+     */
+    handleRealTimeMessage(command) {
+        switch (command) {
+            case 252: // 0xFC - MIDI Stop
+                this.handleMIDIClockStop();
+                break;
+            case 250: // 0xFA - MIDI Start
+                console.log('MIDI Start received');
+                break;
+            case 251: // 0xFB - MIDI Continue
+                console.log('MIDI Continue received');
+                break;
+            case 248: // 0xF8 - MIDI Clock
+                // Clock messages are very frequent, so we don't log them
+                break;
+            default:
+                console.log(`MIDI Real-time message: 0x${command.toString(16).toUpperCase()}`);
+        }
+    }
+    
+    /**
+     * Handle MIDI clock stop - trigger pause/resume button
+     */
+    handleMIDIClockStop() {
+        console.log('MIDI Clock Stop received - triggering pause/resume');
+        if (this.callbacks.toggleStopResume) {
+            this.callbacks.toggleStopResume();
         }
     }
     

@@ -348,6 +348,7 @@ class BeatCountdownTimer {
             increaseVolume: () => this.increaseVolume(),
             decreaseVolume: () => this.decreaseVolume(),
             disableTimer: () => this.disableTimer(),
+            toggleStopResume: () => this.toggleStopResume(),
             updateMIDIStatus: (isConnected, text) => this.uiManager.updateMIDIStatus(isConnected, text)
         };
     }
