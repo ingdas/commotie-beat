@@ -366,6 +366,42 @@ class AudioManager {
     }
     
     /**
+     * Play oneshot sound immediately (plays on top of other sounds)
+     */
+    playOneshotSound(selectedOneshotSound) {
+        if (!this.audioContext) return;
+        
+        const soundConfig = this.soundConfig.getSoundInfo(selectedOneshotSound);
+        
+        if (!soundConfig) {
+            console.warn(`Unknown oneshot sound type: ${selectedOneshotSound}`);
+            return;
+        }
+        
+        const scheduledTime = this.audioContext.currentTime;
+        
+        if (soundConfig.url) {
+            // Single URL-based sound: try to use loaded audio buffer first
+            if (this.audioBuffers[selectedOneshotSound]) {
+                this.playAudioBuffer(this.audioBuffers[selectedOneshotSound], scheduledTime);
+            } else {
+                console.warn(`Audio buffer not loaded for oneshot sound: ${selectedOneshotSound}`);
+            }
+        } else if (soundConfig.urls) {
+            // Multiple URL-based sound: use first available buffer
+            if (this.audioBuffers[selectedOneshotSound] && this.audioBuffers[selectedOneshotSound].length > 0) {
+                const currentBuffer = this.audioBuffers[selectedOneshotSound][0];
+                this.playAudioBuffer(currentBuffer, scheduledTime);
+            } else {
+                console.warn(`Audio buffers not loaded for oneshot sound: ${selectedOneshotSound}`);
+            }
+        } else if (soundConfig.generator) {
+            // Function-based sound: use the generator function
+            this[soundConfig.generator](scheduledTime);
+        }
+    }
+    
+    /**
      * Set the volume level
      */
     setVolume(volume) {

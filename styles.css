@@ -279,6 +279,48 @@ input[type="number"]:focus {
     border-color: #667eea;
 }
 
+.oneshot-selection-controls {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.oneshot-selection-controls label {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
+.oneshot-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.oneshot-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    color: #8b4513;
+    border-color: #fcb69f;
+    min-width: 100px;
+}
+
+.oneshot-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(252, 182, 159, 0.4);
+    background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%);
+    border-color: #fcb69f;
+}
+
 
 .countdown-display {
     margin-bottom: 2rem;
@@ -538,6 +580,11 @@ input[type="number"]:focus {
     }
     
     .sound-btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
+    
+    .oneshot-btn {
         width: 100%;
         margin: 0.25rem 0;
     }

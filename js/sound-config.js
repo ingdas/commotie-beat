@@ -4,6 +4,15 @@
  */
 class SoundConfig {
     constructor() {
+        // Configuration for oneshot button labels (can be customized)
+        this.oneshotLabels = {
+            'OneShot 1': 'Opening Suggestie',
+            'OneShot 2': 'Pose Suggestie', 
+            'OneShot 3': 'Blijdschap suggestie',
+            'OneShot 4': 'Vertel Verhaal',
+            'OneShot 5': 'Einde Stress'
+        };
+        
         this.sounds = [
             {
                 generator: 'scheduleKickDrumAudio',
@@ -49,6 +58,31 @@ class SoundConfig {
             {
                 label: 'Silent',
                 type: 'end'
+            },
+            {
+                url: './sounds/oneshot1.mp3',
+                label: 'OneShot 1',
+                type: 'oneshot'
+            },
+            {
+                url: './sounds/oneshot2.mp3',
+                label: 'OneShot 2',
+                type: 'oneshot'
+            },
+            {
+                url: './sounds/oneshot3.mp3',
+                label: 'OneShot 3',
+                type: 'oneshot'
+            },
+            {
+                url: './sounds/oneshot4.mp3',
+                label: 'OneShot 4',
+                type: 'oneshot'
+            },
+            {
+                url: './sounds/oneshot5.mp3',
+                label: 'OneShot 5',
+                type: 'oneshot'
             }
         ];
         
@@ -96,6 +130,13 @@ class SoundConfig {
     }
     
     /**
+     * Get oneshot sounds only
+     */
+    getOneshotSounds() {
+        return this.sounds.filter(sound => sound.type === 'oneshot');
+    }
+    
+    /**
      * Get sound by MIDI note
      */
     getSoundByMidiNote(note) {
@@ -124,9 +165,36 @@ class SoundConfig {
         }
         
         if (expectedType === 'regular') {
-            return soundConfig.type !== 'end';
+            return soundConfig.type !== 'end' && soundConfig.type !== 'oneshot';
+        }
+        
+        if (expectedType === 'oneshot') {
+            return soundConfig.type === 'oneshot';
         }
         
         return false;
+    }
+    
+    /**
+     * Get the display label for a oneshot sound
+     */
+    getOneshotLabel(soundLabel) {
+        return this.oneshotLabels[soundLabel] || soundLabel;
+    }
+    
+    /**
+     * Set a custom label for a oneshot sound
+     */
+    setOneshotLabel(soundLabel, customLabel) {
+        if (this.oneshotLabels.hasOwnProperty(soundLabel)) {
+            this.oneshotLabels[soundLabel] = customLabel;
+        }
+    }
+    
+    /**
+     * Get all oneshot labels configuration
+     */
+    getOneshotLabels() {
+        return { ...this.oneshotLabels };
     }
 }

@@ -73,10 +73,12 @@ class UIManager {
     generateSoundButtons() {
         const soundButtonsContainer = document.querySelector('.sound-buttons');
         const endingButtonsContainer = document.querySelector('.ending-buttons');
+        const oneshotButtonsContainer = document.querySelector('.oneshot-buttons');
         
         // Clear existing buttons
         soundButtonsContainer.innerHTML = '';
         endingButtonsContainer.innerHTML = '';
+        oneshotButtonsContainer.innerHTML = '';
         
         // Generate buttons from sound configuration
         this.soundConfig.sounds.forEach((soundConfig, index) => {
@@ -84,22 +86,28 @@ class UIManager {
             button.id = `${soundConfig.label.replace(/\s+/g, '')}Btn`;
             button.className = 'sound-btn';
             
-            // Add number prefix for regular sounds (not ending sounds)
+            // Add number prefix for regular sounds (not ending sounds or oneshot sounds)
             if (soundConfig.type === 'end') {
                 button.textContent = soundConfig.label;
+            } else if (soundConfig.type === 'oneshot') {
+                button.textContent = this.soundConfig.getOneshotLabel(soundConfig.label);
             } else {
                 button.textContent = `${index + 1}. ${soundConfig.label}`;
             }
             
             button.dataset.soundType = soundConfig.label;
             
-            // Separate regular sounds from ending sounds
+            // Separate sounds by type
             if (soundConfig.type === 'end') {
                 // Add to ending buttons container
                 if (soundConfig.label === this.selectedEndingSound) {
                     button.classList.add('active');
                 }
                 endingButtonsContainer.appendChild(button);
+            } else if (soundConfig.type === 'oneshot') {
+                // Add to oneshot buttons container
+                button.classList.add('oneshot-btn');
+                oneshotButtonsContainer.appendChild(button);
             } else {
                 // Add to regular sound buttons container
                 if (soundConfig.label === this.selectedSound) {
@@ -137,6 +145,14 @@ class UIManager {
             if (e.target.classList.contains('sound-btn')) {
                 const soundType = e.target.dataset.soundType;
                 this.setEndingSoundType(soundType);
+            }
+        });
+        
+        // OneShot selection controls - use event delegation for dynamic buttons
+        document.querySelector('.oneshot-buttons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sound-btn')) {
+                const soundType = e.target.dataset.soundType;
+                this.playOneshotSound(soundType);
             }
         });
         
@@ -426,6 +442,28 @@ class UIManager {
         if (this.callbacks.onEndingSoundTypeChanged) {
             this.callbacks.onEndingSoundTypeChanged(soundType);
         }
+    }
+    
+    /**
+     * Play oneshot sound immediately
+     */
+    playOneshotSound(soundType) {
+        if (!this.soundConfig.validateSoundType(soundType, 'oneshot')) {
+            console.warn(`Invalid oneshot sound type: ${soundType}`);
+            return;
+        }
+        
+        // Notify main app to play the oneshot sound
+        if (this.callbacks.onOneshotSoundPlay) {
+            this.callbacks.onOneshotSoundPlay(soundType);
+        }
+    }
+    
+    /**
+     * Update oneshot button labels and regenerate buttons
+     */
+    updateOneshotLabels() {
+        this.generateSoundButtons();
     }
     
     /**
