@@ -9,7 +9,7 @@ class UIManager {
         
         // UI state
         this.selectedSound = 'Opening Loop';
-        this.selectedEndingSound = 'Silent';
+        this.selectedEndingSound = 'Boom';
         this.bpm = 110;
         this.volume = 50;
         
@@ -578,9 +578,9 @@ class UIManager {
      */
     reset() {
         this.selectedSound = 'Opening Loop';
-        this.selectedEndingSound = 'Silent';
+        this.selectedEndingSound = 'Boom';
         this.setSoundType('Opening Loop');
-        this.setEndingSoundType('Silent');
+        this.setEndingSoundType('Boom');
         this.updateStopButton(true);
     }
 }
