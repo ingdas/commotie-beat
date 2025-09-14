@@ -184,7 +184,10 @@ class BeatCountdownTimer {
                 this.uiManager.updateTimerDisplay(remainingTimeSeconds);
             },
             triggerBeatAnimation: () => this.uiManager.triggerBeatAnimation(),
-            showCompletion: () => this.uiManager.showCompletion(),
+            showCompletion: () => {
+                this.uiManager.showCompletion();
+                this.sendExplosionSignal();
+            },
             playEndingSound: () => this.playEndingSound(),
             resetCountdown: () => this.resetCountdown()
         };
@@ -507,6 +510,20 @@ class BeatCountdownTimer {
             const data = {
                 type: 'blank',
                 countdown: null,
+                timestamp: Date.now()
+            };
+            
+            this.ws.send(JSON.stringify(data));
+        }
+    }
+    
+    /**
+     * Send explosion signal to display devices
+     */
+    sendExplosionSignal() {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            const data = {
+                type: 'explosion',
                 timestamp: Date.now()
             };
             
