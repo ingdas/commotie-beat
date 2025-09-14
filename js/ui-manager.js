@@ -29,7 +29,7 @@ class UIManager {
             setupPanel: document.getElementById('setupPanel'),
             countdownPanel: document.getElementById('countdownPanel'),
             durationInput: document.getElementById('durationInput'),
-            initialBpmInput: document.getElementById('initialBpmInput'),
+            totalBeatsInput: document.getElementById('totalBeatsInput'),
             startBtn: document.getElementById('startBtn'),
             stopBtn: document.getElementById('stopBtn'),
             disableBtn: document.getElementById('disableBtn'),
@@ -152,17 +152,17 @@ class UIManager {
             }
         });
         
-        // Initial BPM input validation
-        this.elements.initialBpmInput.addEventListener('input', (e) => {
+        // Total beats input validation
+        this.elements.totalBeatsInput.addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
         
-        this.elements.initialBpmInput.addEventListener('blur', (e) => {
+        this.elements.totalBeatsInput.addEventListener('blur', (e) => {
             const value = parseInt(e.target.value);
-            if (isNaN(value) || value < 30) {
-                e.target.value = 30;
-            } else if (value > 200) {
-                e.target.value = 200;
+            if (isNaN(value) || value < 1) {
+                e.target.value = 1;
+            } else if (value > 9999) {
+                e.target.value = 9999;
             }
         });
         
@@ -530,8 +530,8 @@ class UIManager {
         return parseInt(this.elements.durationInput.value);
     }
     
-    getInitialBpmValue() {
-        return parseInt(this.elements.initialBpmInput.value);
+    getTotalBeatsValue() {
+        return parseInt(this.elements.totalBeatsInput.value);
     }
     
     getSelectedSound() {

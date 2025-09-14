@@ -211,15 +211,15 @@ class BeatCountdownTimer {
      */
     startCountdown() {
         const durationValue = this.uiManager.getDurationValue();
-        const initialBpmValue = this.uiManager.getInitialBpmValue();
+        const totalBeatsValue = this.uiManager.getTotalBeatsValue();
         
         if (durationValue < 1) {
             alert('Please enter a valid duration (1-999 minutes)');
             return;
         }
         
-        if (initialBpmValue < 30 || initialBpmValue > 200) {
-            alert('Please enter a valid BPM (30-200)');
+        if (totalBeatsValue < 1 || totalBeatsValue > 9999) {
+            alert('Please enter a valid total beats (1-9999)');
             return;
         }
         
@@ -229,7 +229,7 @@ class BeatCountdownTimer {
         const startingBpm = 110;
         
         // Start the timer
-        this.timerManager.startCountdown(durationValue, startingBpm, selectedSound);
+        this.timerManager.startCountdown(durationValue, startingBpm, selectedSound, totalBeatsValue);
         
         // Reset counter tracking for new countdown
         this.previousCountdown = null;
@@ -264,12 +264,12 @@ class BeatCountdownTimer {
      * Reset the countdown
      */
     resetCountdown() {
-        const initialBpmValue = this.uiManager.getInitialBpmValue();
+        const totalBeatsValue = this.uiManager.getTotalBeatsValue();
         
         // Always reset to 110 BPM regardless of input field value
         const startingBpm = 110;
         
-        this.timerManager.resetCountdown(startingBpm);
+        this.timerManager.resetCountdown(startingBpm, totalBeatsValue);
         this.uiManager.setBpm(startingBpm);
         this.uiManager.updateSliderPosition(startingBpm);
         this.uiManager.reset();

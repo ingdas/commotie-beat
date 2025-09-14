@@ -36,13 +36,13 @@ class TimerManager {
     /**
      * Start the countdown timer
      */
-    startCountdown(targetDurationMinutes, initialBpm, selectedSound) {
+    startCountdown(targetDurationMinutes, initialBpm, selectedSound, totalBeats) {
         this.targetDurationMinutes = targetDurationMinutes;
         this.remainingTimeSeconds = targetDurationMinutes * 60;
         this.bpm = initialBpm;
         
-        // Calculate how many beats we need based on the BPM
-        this.countdown = this.calculateRequiredBeats();
+        // Use the provided total beats directly
+        this.countdown = totalBeats;
         this.originalCountdown = this.countdown;
         
         this.isRunning = true;
@@ -229,9 +229,10 @@ class TimerManager {
     /**
      * Reset the countdown to initial state
      */
-    resetCountdown(initialBpm) {
+    resetCountdown(initialBpm, totalBeats) {
         this.stopCountdown();
-        this.countdown = this.originalCountdown;
+        this.countdown = totalBeats;
+        this.originalCountdown = this.countdown;
         this.remainingTimeSeconds = this.targetDurationMinutes * 60;
         this.bpm = initialBpm;
         
