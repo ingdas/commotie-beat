@@ -5,6 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commotie Beat - Display</title>
     <style>
+        @font-face {
+            font-family: 'SevenSegment';
+            src: url('sevensegment.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -12,7 +19,7 @@
         }
 
         body {
-            font-family: 'Courier New', monospace;
+            font-family: 'SevenSegment', monospace;
             background: #000000;
             color: #ff0000;
             display: flex;
@@ -23,35 +30,48 @@
         }
 
         .beat-display {
-            font-size: 50vw;
+            font-size: 45vw;
             font-weight: bold;
             text-align: center;
-            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
             height: 100vh;
             width: 100vw;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            align-items: center;
+            justify-items: center;
+            line-height: 0.8;
+            gap: 0.2em;
+            padding: 0 3vw;
+            box-sizing: border-box;
+        }
+
+        .digit {
             display: flex;
             align-items: center;
             justify-content: center;
-            letter-spacing: 0.05em;
-            line-height: 0.8;
+            font-variant-numeric: tabular-nums;
+            min-width: 0;
+            width: 100%;
         }
 
         .beat-display.beat-animation {
             animation: bombCountdown 0.3s ease-in-out;
+            transform-origin: center;
         }
 
         @keyframes bombCountdown {
             0% { 
                 transform: scale(1);
-                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
             }
             50% { 
-                transform: scale(1.1);
-                text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 90px #ff0000;
+                transform: scale(1.02);
+                text-shadow: 0 0 15px #ff0000, 0 0 30px #ff0000, 0 0 45px #ff0000;
             }
             100% { 
                 transform: scale(1);
-                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+                text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
             }
         }
 
@@ -64,7 +84,7 @@
             color: #000000;
             font-size: 0.8rem;
             font-weight: bold;
-            font-family: 'Courier New', monospace;
+            font-family: 'SevenSegment', monospace;
             border: 2px solid #ff0000;
         }
 
@@ -85,7 +105,10 @@
     <div class="connection-status" id="connectionStatus">CONNECTING</div>
     
     <div class="beat-display" id="beatDisplay">
-        <span id="beatNumber">--</span>
+        <span class="digit" id="digit1">0</span>
+        <span class="digit" id="digit2">0</span>
+        <span class="digit" id="digit3">0</span>
+        <span class="digit" id="digit4">0</span>
     </div>
 
     <script>
@@ -99,7 +122,10 @@
                 this.elements = {
                     connectionStatus: document.getElementById('connectionStatus'),
                     beatDisplay: document.getElementById('beatDisplay'),
-                    beatNumber: document.getElementById('beatNumber')
+                    digit1: document.getElementById('digit1'),
+                    digit2: document.getElementById('digit2'),
+                    digit3: document.getElementById('digit3'),
+                    digit4: document.getElementById('digit4')
                 };
                 
                 this.connect();
@@ -175,13 +201,27 @@
             updateDisplay(data) {
                 // Update beat count only
                 if (data.countdown !== undefined) {
-                    this.elements.beatNumber.textContent = data.countdown;
+                    // Format as 4-digit number with leading zeros
+                    const newNumber = data.countdown.toString().padStart(4, '0');
+                    const currentNumber = this.elements.digit1.textContent + 
+                                        this.elements.digit2.textContent + 
+                                        this.elements.digit3.textContent + 
+                                        this.elements.digit4.textContent;
                     
-                    // Trigger bomb countdown animation
-                    this.elements.beatDisplay.classList.remove('beat-animation');
-                    setTimeout(() => {
-                        this.elements.beatDisplay.classList.add('beat-animation');
-                    }, 10);
+                    // Only trigger animation if the number actually changed
+                    if (currentNumber !== newNumber) {
+                        // Update each digit individually
+                        this.elements.digit1.textContent = newNumber[0];
+                        this.elements.digit2.textContent = newNumber[1];
+                        this.elements.digit3.textContent = newNumber[2];
+                        this.elements.digit4.textContent = newNumber[3];
+                        
+                        // Trigger bomb countdown animation
+                        this.elements.beatDisplay.classList.remove('beat-animation');
+                        setTimeout(() => {
+                            this.elements.beatDisplay.classList.add('beat-animation');
+                        }, 10);
+                    }
                 }
             }
         }

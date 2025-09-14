@@ -24,6 +24,9 @@ class BeatCountdownTimer {
         this.wsReconnectAttempts = 0;
         this.maxWsReconnectAttempts = 10;
         
+        // Track previous countdown value to only broadcast when it changes
+        this.previousCountdown = null;
+        
         // Initialize the application
         this.initialize();
     }
@@ -153,11 +156,10 @@ class BeatCountdownTimer {
             onTimerEnabled: () => this.onTimerEnabled(),
             updateDisplay: (countdown, bpm, requiredBpm) => {
                 this.uiManager.updateDisplay(countdown, bpm, requiredBpm);
-                this.broadcastBeatData();
+                this.broadcastBeatDataIfCounterChanged(countdown);
             },
             updateTimerDisplay: (remainingTimeSeconds) => {
                 this.uiManager.updateTimerDisplay(remainingTimeSeconds);
-                this.broadcastBeatData();
             },
             triggerBeatAnimation: () => this.uiManager.triggerBeatAnimation(),
             showCompletion: () => this.uiManager.showCompletion(),
@@ -204,6 +206,9 @@ class BeatCountdownTimer {
         // Start the timer
         this.timerManager.startCountdown(durationValue, initialBpmValue, selectedSound);
         
+        // Reset counter tracking for new countdown
+        this.previousCountdown = null;
+        
         // Update UI
         this.uiManager.setBpm(initialBpmValue);
         this.uiManager.updateSliderPosition(initialBpmValue);
@@ -241,6 +246,9 @@ class BeatCountdownTimer {
         this.uiManager.updateSliderPosition(initialBpmValue);
         this.uiManager.reset();
         this.uiManager.showSetupPanel();
+        
+        // Reset counter tracking
+        this.previousCountdown = null;
     }
     
     /**
@@ -448,6 +456,16 @@ class BeatCountdownTimer {
     }
     
     /**
+     * Broadcast beat data to display devices only when counter changes
+     */
+    broadcastBeatDataIfCounterChanged(countdown) {
+        if (this.previousCountdown !== countdown) {
+            this.previousCountdown = countdown;
+            this.broadcastBeatData();
+        }
+    }
+    
+    /**
      * Broadcast beat data to display devices
      */
     broadcastBeatData() {
@@ -455,10 +473,6 @@ class BeatCountdownTimer {
             const state = this.timerManager.getState();
             const data = {
                 countdown: state.countdown,
-                bpm: state.bpm,
-                remainingTimeSeconds: state.remainingTimeSeconds,
-                isRunning: state.isRunning,
-                requiredBpm: state.requiredBpm,
                 timestamp: Date.now()
             };
             
