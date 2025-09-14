@@ -18,6 +18,17 @@ class BeatCountdownTimer {
         this.openingSoundAudio = null;
         this.openingSound2Audio = null;
         
+        // Opening sound 2 sequence properties
+        this.openingSound2TotalBeats = 0;
+        this.openingSound2RemainingBeats = 0;
+        this.openingSound2VisualCount = 0;
+        this.openingSound2Bpm = 60;
+        this.openingSound2IsRunning = false;
+        this.openingSound2BeatInterval = 0;
+        this.openingSound2NextBeatTime = 0;
+        this.openingSound2StartTime = 0;
+        this.openingSound2AnimationFrameId = null;
+        
         // WebSocket for broadcasting to display devices
         this.ws = null;
         this.wsReconnectInterval = null;
@@ -128,6 +139,124 @@ class BeatCountdownTimer {
         this.openingSound2Audio.play().catch(error => {
             console.warn('Could not play opening sound 2:', error);
         });
+        
+        // Start the special opening sound 2 sequence
+        this.startOpeningSound2Sequence();
+    }
+    
+    /**
+     * Start the opening sound 2 sequence: 4s delay, then 30 visual beats at 60bpm, then start regular timer
+     */
+    startOpeningSound2Sequence() {
+        // Get the configured total beats from UI
+        this.openingSound2TotalBeats = this.uiManager.getTotalBeatsValue();
+        this.openingSound2RemainingBeats = this.openingSound2TotalBeats;
+        
+        // Show countdown panel immediately with configured beats
+        this.uiManager.showCountdownPanel();
+        this.uiManager.updateDisplay(this.openingSound2RemainingBeats, 60, 60);
+        
+        // After 4 seconds, start the 60bpm visual beat sequence
+        setTimeout(() => {
+            this.startOpeningSound2VisualSequence();
+        }, 7200);
+    }
+    
+    /**
+     * Start the 60bpm visual beat sequence for 30 beats
+     */
+    startOpeningSound2VisualSequence() {
+        this.openingSound2VisualCount = 32;
+        this.openingSound2Bpm = 60;
+        this.openingSound2IsRunning = true;
+        
+        // Calculate beat interval for 60bpm
+        this.openingSound2BeatInterval = 60 / this.openingSound2Bpm;
+        
+        // Start the visual beat scheduling
+        this.startOpeningSound2VisualScheduling();
+    }
+    
+    /**
+     * Start the visual beat scheduling for opening sound 2
+     */
+    startOpeningSound2VisualScheduling() {
+        if (!this.openingSound2IsRunning) return;
+        
+        const currentTime = this.audioManager.getCurrentTime();
+        this.openingSound2NextBeatTime = currentTime;
+        this.openingSound2StartTime = currentTime;
+        
+        // Start the animation frame loop for visual beat scheduling
+        this.openingSound2AnimationFrameId = requestAnimationFrame(() => this.openingSound2VisualSchedulerLoop());
+    }
+    
+    /**
+     * Main scheduling loop for opening sound 2 visual beats
+     */
+    openingSound2VisualSchedulerLoop() {
+        if (!this.openingSound2IsRunning) return;
+        
+        const currentTime = this.audioManager.getCurrentTime();
+        
+        // Check if it's time for the next visual beat
+        if (currentTime >= this.openingSound2NextBeatTime && this.openingSound2VisualCount > 0) {
+            // NO SOUND - this is visual only
+            // Just update the remaining beats count
+            this.openingSound2RemainingBeats--;
+            
+            // Update display with remaining beats
+            this.uiManager.updateDisplay(this.openingSound2RemainingBeats, this.openingSound2Bpm, this.openingSound2Bpm);
+            this.uiManager.triggerBeatAnimation();
+            
+            // Broadcast to display devices
+            this.broadcastBeatData();
+            
+            // Schedule next visual beat
+            this.openingSound2NextBeatTime += this.openingSound2BeatInterval;
+            
+            // Decrement visual count
+            this.openingSound2VisualCount--;
+            
+            // Check if we're done with the 30 visual beats
+            if (this.openingSound2VisualCount <= 0) {
+                this.openingSound2IsRunning = false;
+                this.startRegularTimerAfterVisualSequence();
+                return;
+            }
+        }
+        
+        // Continue the loop
+        if (this.openingSound2IsRunning) {
+            this.openingSound2AnimationFrameId = requestAnimationFrame(() => this.openingSound2VisualSchedulerLoop());
+        }
+    }
+    
+    /**
+     * Start the regular timer after the visual sequence completes
+     */
+    startRegularTimerAfterVisualSequence() {
+        // Clean up the animation frame
+        if (this.openingSound2AnimationFrameId) {
+            cancelAnimationFrame(this.openingSound2AnimationFrameId);
+            this.openingSound2AnimationFrameId = null;
+        }
+        
+        // Get the remaining beats after 30 visual beats
+        const remainingBeats = this.openingSound2RemainingBeats;
+        const durationValue = this.uiManager.getDurationValue();
+        const selectedSound = this.uiManager.getSelectedSound();
+        
+        // Start the regular timer with remaining beats at 110 BPM
+        this.timerManager.startCountdown(durationValue, 110, selectedSound, remainingBeats);
+        
+        // Update UI to show the regular timer state
+        this.uiManager.setBpm(110);
+        this.uiManager.updateSliderPosition(110);
+        this.uiManager.updateVolumeSliderPosition(this.uiManager.getVolume());
+        
+        // Broadcast the new state
+        this.broadcastBeatData();
     }
     
     /**
@@ -144,6 +273,15 @@ class BeatCountdownTimer {
             this.openingSound2Audio.pause();
             this.openingSound2Audio.currentTime = 0;
             this.openingSound2Audio = null;
+        }
+        
+        // Stop opening sound 2 sequence if running
+        if (this.openingSound2IsRunning) {
+            this.openingSound2IsRunning = false;
+            if (this.openingSound2AnimationFrameId) {
+                cancelAnimationFrame(this.openingSound2AnimationFrameId);
+                this.openingSound2AnimationFrameId = null;
+            }
         }
     }
     
@@ -538,10 +676,20 @@ class BeatCountdownTimer {
      */
     broadcastBeatData() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-            const state = this.timerManager.getState();
+            let countdown = null;
+            
+            // Check if opening sound 2 sequence is running
+            if (this.openingSound2IsRunning) {
+                countdown = this.openingSound2RemainingBeats;
+            } else {
+                // Use regular timer state
+                const state = this.timerManager.getState();
+                countdown = state.countdown;
+            }
+            
             const data = {
                 type: 'countdown',
-                countdown: state.countdown,
+                countdown: countdown,
                 timestamp: Date.now()
             };
             
