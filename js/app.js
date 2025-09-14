@@ -299,7 +299,8 @@ class BeatCountdownTimer {
             setToRequiredBpm: () => this.setToRequiredBpm(),
             applyBpmChange: (bpm) => this.applyBpmChange(bpm),
             onSoundTypeChanged: (soundType) => this.onSoundTypeChanged(soundType),
-            onEndingSoundTypeChanged: (soundType) => this.onEndingSoundTypeChanged(soundType)
+            onEndingSoundTypeChanged: (soundType) => this.onEndingSoundTypeChanged(soundType),
+            onVolumeChanged: (volume) => this.onVolumeChanged(volume)
         };
     }
     
@@ -479,6 +480,14 @@ class BeatCountdownTimer {
      */
     onEndingSoundTypeChanged(soundType) {
         // No additional action needed for ending sound changes
+    }
+    
+    /**
+     * Handle volume change
+     */
+    onVolumeChanged(volume) {
+        // Update audio manager volume
+        this.audioManager.setVolume(volume);
     }
     
     /**
