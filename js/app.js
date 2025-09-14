@@ -266,7 +266,7 @@ class BeatCountdownTimer {
     /**
      * Reset the countdown
      */
-    resetCountdown() {
+    resetCountdown(sendBlankSignal = true) {
         const totalBeatsValue = this.uiManager.getTotalBeatsValue();
         
         // Always reset to 110 BPM regardless of input field value
@@ -281,8 +281,10 @@ class BeatCountdownTimer {
         // Reset counter tracking
         this.previousCountdown = null;
         
-        // Send blank screen signal when reset
-        this.sendBlankScreenSignal();
+        // Send blank screen signal when reset (only for manual resets)
+        if (sendBlankSignal) {
+            this.sendBlankScreenSignal();
+        }
     }
     
     /**

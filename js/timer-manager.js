@@ -31,6 +31,9 @@ class TimerManager {
         // Disable timer state
         this.isDisabled = false;
         this.disableTimeout = null;
+        
+        // Completion state
+        this.isCompleted = false;
     }
     
     /**
@@ -46,6 +49,7 @@ class TimerManager {
         this.originalCountdown = this.countdown;
         
         this.isRunning = true;
+        this.isCompleted = false;
         
         // Resume audio context if suspended
         this.audioManager.resumeAudioContext();
@@ -150,7 +154,8 @@ class TimerManager {
             this.triggerBeatAnimation();
             
             // Check if this was the final beat (beat number equals original countdown)
-            if (audioBeat.beatNumber === this.originalCountdown) {
+            if (audioBeat.beatNumber === this.originalCountdown && !this.isCompleted) {
+                this.isCompleted = true;
                 this.stopCountdown();
                 this.showCompletion();
                 return;
@@ -158,7 +163,9 @@ class TimerManager {
         }
         
         // Check if we're done (only after all scheduled beats are processed)
-        if (this.countdown < 0) {
+        // Only check this if we haven't already completed via the beat number check above
+        if (this.countdown < 0 && this.isRunning && !this.isCompleted) {
+            this.isCompleted = true;
             this.stopCountdown();
             this.showCompletion();
             return;
@@ -243,6 +250,7 @@ class TimerManager {
         this.originalCountdown = this.countdown;
         this.remainingTimeSeconds = this.targetDurationMinutes * 60;
         this.bpm = initialBpm;
+        this.isCompleted = false;
         
         this.updateDisplay();
         this.updateTimerDisplay();
@@ -362,13 +370,6 @@ class TimerManager {
         if (this.callbacks.playEndingSound) {
             this.callbacks.playEndingSound();
         }
-        
-        // Auto-reset after 2 seconds
-        setTimeout(() => {
-            if (this.callbacks.resetCountdown) {
-                this.callbacks.resetCountdown();
-            }
-        }, 2000);
     }
     
     /**
