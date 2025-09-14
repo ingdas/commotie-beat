@@ -14,6 +14,10 @@ class BeatCountdownTimer {
         // Set up timer manager to get current sound from UI manager
         this.timerManager.getCurrentSound = () => this.uiManager.getSelectedSound();
         
+        // Store reference to opening sound audio objects
+        this.openingSoundAudio = null;
+        this.openingSound2Audio = null;
+        
         // Initialize the application
         this.initialize();
     }
@@ -25,9 +29,88 @@ class BeatCountdownTimer {
         // Load audio files
         await this.audioManager.loadAudioFiles();
         
+        // Set up opening sound button
+        this.setupOpeningSoundButton();
+        
         // Log available sounds for debugging
         console.log('Available sounds:', this.soundConfig.getAvailableSounds());
         console.log('Sound configuration:', this.soundConfig.sounds);
+    }
+    
+    /**
+     * Set up the opening sound button functionality
+     */
+    setupOpeningSoundButton() {
+        const playOpeningSoundBtn = document.getElementById('playOpeningSoundBtn');
+        const playOpeningSound2Btn = document.getElementById('playOpeningSound2Btn');
+        const stopOpeningSoundBtn = document.getElementById('stopOpeningSoundBtn');
+        
+        if (playOpeningSoundBtn) {
+            playOpeningSoundBtn.addEventListener('click', () => {
+                this.playOpeningSound();
+            });
+        }
+        
+        if (playOpeningSound2Btn) {
+            playOpeningSound2Btn.addEventListener('click', () => {
+                this.playOpeningSound2();
+            });
+        }
+        
+        if (stopOpeningSoundBtn) {
+            stopOpeningSoundBtn.addEventListener('click', () => {
+                this.stopAllOpeningSounds();
+            });
+        }
+    }
+    
+    /**
+     * Play the opening sound 1
+     */
+    playOpeningSound() {
+        // Stop any currently playing opening sounds
+        this.stopAllOpeningSounds();
+        
+        // Create new audio object and store reference
+        this.openingSoundAudio = new Audio('./sounds/open1.mp3');
+        this.openingSoundAudio.volume = 1;
+        
+        this.openingSoundAudio.play().catch(error => {
+            console.warn('Could not play opening sound 1:', error);
+        });
+    }
+    
+    /**
+     * Play the opening sound 2
+     */
+    playOpeningSound2() {
+        // Stop any currently playing opening sounds
+        this.stopAllOpeningSounds();
+        
+        // Create new audio object and store reference
+        this.openingSound2Audio = new Audio('./sounds/open2.mp3');
+        this.openingSound2Audio.volume = 1;
+        
+        this.openingSound2Audio.play().catch(error => {
+            console.warn('Could not play opening sound 2:', error);
+        });
+    }
+    
+    /**
+     * Stop all opening sounds
+     */
+    stopAllOpeningSounds() {
+        if (this.openingSoundAudio) {
+            this.openingSoundAudio.pause();
+            this.openingSoundAudio.currentTime = 0;
+            this.openingSoundAudio = null;
+        }
+        
+        if (this.openingSound2Audio) {
+            this.openingSound2Audio.pause();
+            this.openingSound2Audio.currentTime = 0;
+            this.openingSound2Audio = null;
+        }
     }
     
     /**

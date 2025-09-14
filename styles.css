@@ -182,6 +182,57 @@ input[type="number"]:focus {
     transform: none;
 }
 
+.opening-sound-controls {
+    margin: 1.5rem 0;
+    text-align: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.opening-sound-btn {
+    padding: 0.75rem 1.5rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    color: white;
+    border-color: #f093fb;
+    flex: 1;
+    min-width: 180px;
+    max-width: 200px;
+}
+
+.opening-sound-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(240, 147, 251, 0.3);
+    background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+}
+
+.opening-sound-btn.play-btn-2 {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    border-color: #4facfe;
+}
+
+.opening-sound-btn.play-btn-2:hover {
+    background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
+    box-shadow: 0 8px 16px rgba(79, 172, 254, 0.3);
+}
+
+.opening-sound-btn.stop-btn {
+    background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+    border-color: #e53e3e;
+}
+
+.opening-sound-btn.stop-btn:hover {
+    background: linear-gradient(135deg, #c53030 0%, #9c2626 100%);
+    box-shadow: 0 8px 16px rgba(229, 62, 62, 0.3);
+}
+
 
 
 .sound-selection-controls {
@@ -508,5 +559,15 @@ input[type="number"]:focus {
     
     .set-bpm-btn {
         order: -1; /* Put "Set to Required" button first on mobile */
+    }
+    
+    .opening-sound-controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .opening-sound-btn {
+        width: 100%;
+        max-width: none;
     }
 }
