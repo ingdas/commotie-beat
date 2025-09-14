@@ -18,6 +18,12 @@ class BeatCountdownTimer {
         this.openingSoundAudio = null;
         this.openingSound2Audio = null;
         
+        // WebSocket for broadcasting to display devices
+        this.ws = null;
+        this.wsReconnectInterval = null;
+        this.wsReconnectAttempts = 0;
+        this.maxWsReconnectAttempts = 10;
+        
         // Initialize the application
         this.initialize();
     }
@@ -31,6 +37,9 @@ class BeatCountdownTimer {
         
         // Set up opening sound button
         this.setupOpeningSoundButton();
+        
+        // Initialize WebSocket connection
+        this.initializeWebSocket();
         
         // Log available sounds for debugging
         console.log('Available sounds:', this.soundConfig.getAvailableSounds());
@@ -142,8 +151,14 @@ class BeatCountdownTimer {
             onCountdownReset: () => this.onCountdownReset(),
             onTimerDisabled: () => this.onTimerDisabled(),
             onTimerEnabled: () => this.onTimerEnabled(),
-            updateDisplay: (countdown, bpm, requiredBpm) => this.uiManager.updateDisplay(countdown, bpm, requiredBpm),
-            updateTimerDisplay: (remainingTimeSeconds) => this.uiManager.updateTimerDisplay(remainingTimeSeconds),
+            updateDisplay: (countdown, bpm, requiredBpm) => {
+                this.uiManager.updateDisplay(countdown, bpm, requiredBpm);
+                this.broadcastBeatData();
+            },
+            updateTimerDisplay: (remainingTimeSeconds) => {
+                this.uiManager.updateTimerDisplay(remainingTimeSeconds);
+                this.broadcastBeatData();
+            },
             triggerBeatAnimation: () => this.uiManager.triggerBeatAnimation(),
             showCompletion: () => this.uiManager.showCompletion(),
             playEndingSound: () => this.playEndingSound(),
@@ -289,6 +304,7 @@ class BeatCountdownTimer {
      */
     onCountdownStarted() {
         this.uiManager.updateStopButton(true);
+        this.broadcastBeatData();
     }
     
     /**
@@ -296,6 +312,7 @@ class BeatCountdownTimer {
      */
     onCountdownStopped() {
         this.uiManager.updateStopButton(false);
+        this.broadcastBeatData();
     }
     
     /**
@@ -303,6 +320,7 @@ class BeatCountdownTimer {
      */
     onCountdownResumed() {
         this.uiManager.updateStopButton(true);
+        this.broadcastBeatData();
     }
     
     /**
@@ -310,6 +328,7 @@ class BeatCountdownTimer {
      */
     onCountdownReset() {
         this.uiManager.updateStopButton(true);
+        this.broadcastBeatData();
     }
     
     /**
@@ -317,6 +336,7 @@ class BeatCountdownTimer {
      */
     onTimerDisabled() {
         this.uiManager.updateDisableButton(true);
+        this.broadcastBeatData();
     }
     
     /**
@@ -324,6 +344,7 @@ class BeatCountdownTimer {
      */
     onTimerEnabled() {
         this.uiManager.updateDisableButton(false);
+        this.broadcastBeatData();
     }
     
     /**
@@ -370,6 +391,79 @@ class BeatCountdownTimer {
         const newVolume = Math.max(20, this.uiManager.getVolume() - 1);
         this.uiManager.setVolume(newVolume);
         this.audioManager.setVolume(newVolume);
+    }
+    
+    /**
+     * Initialize WebSocket connection for broadcasting to display devices
+     */
+    initializeWebSocket() {
+        try {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.hostname}:8080`;
+            
+            this.ws = new WebSocket(wsUrl);
+            
+            this.ws.onopen = () => {
+                console.log('Connected to WebSocket server for display broadcasting');
+                this.wsReconnectAttempts = 0;
+                
+                if (this.wsReconnectInterval) {
+                    clearInterval(this.wsReconnectInterval);
+                    this.wsReconnectInterval = null;
+                }
+            };
+            
+            this.ws.onclose = () => {
+                console.log('Disconnected from WebSocket server');
+                this.scheduleWebSocketReconnect();
+            };
+            
+            this.ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+            
+        } catch (error) {
+            console.error('Failed to create WebSocket connection:', error);
+            this.scheduleWebSocketReconnect();
+        }
+    }
+    
+    /**
+     * Schedule WebSocket reconnection
+     */
+    scheduleWebSocketReconnect() {
+        if (this.wsReconnectAttempts >= this.maxWsReconnectAttempts) {
+            console.log('Max WebSocket reconnection attempts reached');
+            return;
+        }
+        
+        this.wsReconnectAttempts++;
+        const delay = Math.min(1000 * Math.pow(2, this.wsReconnectAttempts), 30000);
+        
+        console.log(`Scheduling WebSocket reconnection in ${delay}ms (attempt ${this.wsReconnectAttempts}/${this.maxWsReconnectAttempts})`);
+        
+        this.wsReconnectInterval = setTimeout(() => {
+            this.initializeWebSocket();
+        }, delay);
+    }
+    
+    /**
+     * Broadcast beat data to display devices
+     */
+    broadcastBeatData() {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            const state = this.timerManager.getState();
+            const data = {
+                countdown: state.countdown,
+                bpm: state.bpm,
+                remainingTimeSeconds: state.remainingTimeSeconds,
+                isRunning: state.isRunning,
+                requiredBpm: state.requiredBpm,
+                timestamp: Date.now()
+            };
+            
+            this.ws.send(JSON.stringify(data));
+        }
     }
 }
 

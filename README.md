@@ -1,6 +1,6 @@
 # Commotie: The Beat
 
-A rhythmic countdown timer that synchronizes beats with a countdown timer.
+A rhythmic countdown timer that synchronizes beats with a countdown timer, now with synchronized display devices.
 
 ## Features
 
@@ -15,6 +15,8 @@ A rhythmic countdown timer that synchronizes beats with a countdown timer.
 - **Visual Feedback**: Beat indicator animation and number scaling
 - **MIDI Support**: Control the timer with MIDI devices
 - **Disable Timer**: Temporarily pause the timer for 5 seconds
+- **Synchronized Display**: Secondary display page for showing beat count on other devices
+- **Real-time Communication**: WebSocket-based synchronization between main app and display devices
 
 ## How It Works
 
@@ -55,12 +57,70 @@ The app supports MIDI input for hands-free control:
 - Responsive design for mobile and desktop
 - Real-time BPM calculation based on remaining time and beats
 
-## Running the App
+## Setup and Installation
 
-Simply open `index.html` in a web browser, or serve it using a local server:
+1. **Install Dependencies**:
+   ```bash
+   npm install
+   ```
 
-```bash
-python3 -m http.server 8000
+2. **Start the Server**:
+   ```bash
+   npm start
+   ```
+
+3. **Access the Application**:
+   - Main application: `http://localhost:8080`
+   - Display page: `http://localhost:8080/display.html`
+
+## Display Devices
+
+The application now supports synchronized display devices:
+
+1. Open `http://localhost:8080/display.html` on any device (phone, tablet, laptop)
+2. The display will automatically connect to the main application
+3. Shows real-time beat count, BPM, and remaining time
+4. Automatically reconnects if connection is lost
+5. Perfect for showing the beat count to an audience or on a separate screen
+
+## File Structure
+
+```
+commotie-beat/
+├── index.html              # Main application page
+├── display.html            # Display-only page for other devices
+├── server.js               # WebSocket server
+├── package.json            # Node.js dependencies
+├── styles.css              # Main application styles
+├── js/
+│   ├── app.js              # Main application logic
+│   ├── audio-manager.js    # Audio handling
+│   ├── midi-manager.js     # MIDI device support
+│   ├── sound-config.js     # Sound configuration
+│   ├── timer-manager.js    # Timer logic
+│   └── ui-manager.js       # User interface management
+└── sounds/                 # Audio files
+    ├── boom.mp3
+    ├── clock1.wav
+    ├── clock2.wav
+    ├── dream.wav
+    ├── kickdrum.wav
+    ├── metronome.wav
+    ├── open1.mp3
+    ├── open2.mp3
+    └── water.mp3
 ```
 
-Then visit `http://localhost:8000` in your browser.
+## Technical Details
+
+- **WebSocket Server**: Handles real-time communication between main app and display devices
+- **Beat Scheduling**: Uses Web Audio API for precise timing
+- **MIDI Integration**: Supports MIDI input devices for control
+- **Responsive Design**: Works on desktop and mobile devices
+- **Auto-reconnection**: Display devices automatically reconnect if connection is lost
+
+## Requirements
+
+- Node.js (for WebSocket server)
+- Modern web browser with Web Audio API support
+- Optional: MIDI device for enhanced control
