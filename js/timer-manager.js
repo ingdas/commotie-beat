@@ -81,8 +81,7 @@ class TimerManager {
         this.scheduleBeats(selectedSound);
         this.animationFrameId = requestAnimationFrame(() => this.schedulerLoop(selectedSound));
         
-        // Play first beat immediately
-        this.playBassDrum(selectedSound);
+        // Trigger first beat animation immediately
         this.triggerBeatAnimation();
     }
     
@@ -124,13 +123,6 @@ class TimerManager {
         }
     }
     
-    /**
-     * Play the first beat immediately
-     */
-    playBassDrum(selectedSound) {
-        const currentSound = this.getCurrentSound ? this.getCurrentSound() : selectedSound;
-        this.audioManager.scheduleBeatAudio(currentSound, this.audioManager.getCurrentTime());
-    }
     
     /**
      * Main scheduling loop
