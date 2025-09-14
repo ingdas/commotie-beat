@@ -83,6 +83,30 @@ class SoundConfig {
                 url: './sounds/oneshot5.mp3',
                 label: 'OneShot 5',
                 type: 'oneshot'
+            },
+            {
+                generator: 'scheduleKickDrumAudio',
+                label: 'Thump 50',
+                type: 'combo',
+                bpm: 50
+            },
+            {
+                generator: 'scheduleHeartbeatAudio',
+                label: 'Heartbeat 50',
+                type: 'combo',
+                bpm: 50
+            },
+            {
+                urls: ['./sounds/clock1.wav', './sounds/clock2.wav'],
+                label: 'Clock 60',
+                type: 'combo',
+                bpm: 60
+            },
+            {
+                urls: ['./sounds/drumloop1.mp3', './sounds/drumloop2.mp3'],
+                label: 'Opening Loop 110',
+                type: 'combo',
+                bpm: 110
             }
         ];
         
@@ -137,6 +161,13 @@ class SoundConfig {
     }
     
     /**
+     * Get combo sounds only (sound + BPM combinations)
+     */
+    getComboSounds() {
+        return this.sounds.filter(sound => sound.type === 'combo');
+    }
+    
+    /**
      * Get sound by MIDI note
      */
     getSoundByMidiNote(note) {
@@ -170,6 +201,10 @@ class SoundConfig {
         
         if (expectedType === 'oneshot') {
             return soundConfig.type === 'oneshot';
+        }
+        
+        if (expectedType === 'combo') {
+            return soundConfig.type === 'combo';
         }
         
         return false;

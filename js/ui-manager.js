@@ -78,11 +78,13 @@ class UIManager {
         const soundButtonsContainer = document.querySelector('.sound-buttons');
         const endingButtonsContainer = document.querySelector('.ending-buttons');
         const oneshotButtonsContainer = document.querySelector('.oneshot-buttons');
+        const comboButtonsContainer = document.querySelector('.combo-buttons');
         
         // Clear existing buttons
         soundButtonsContainer.innerHTML = '';
         endingButtonsContainer.innerHTML = '';
         oneshotButtonsContainer.innerHTML = '';
+        comboButtonsContainer.innerHTML = '';
         
         // Generate buttons from sound configuration
         this.soundConfig.sounds.forEach((soundConfig, index) => {
@@ -112,6 +114,10 @@ class UIManager {
                 // Add to oneshot buttons container
                 button.classList.add('oneshot-btn');
                 oneshotButtonsContainer.appendChild(button);
+            } else if (soundConfig.type === 'combo') {
+                // Add to combo buttons container
+                button.classList.add('combo-btn');
+                comboButtonsContainer.appendChild(button);
             } else {
                 // Add to regular sound buttons container
                 if (soundConfig.label === this.selectedSound) {
@@ -157,6 +163,14 @@ class UIManager {
             if (e.target.classList.contains('sound-btn')) {
                 const soundType = e.target.dataset.soundType;
                 this.playOneshotSound(soundType);
+            }
+        });
+        
+        // Combo selection controls - use event delegation for dynamic buttons
+        document.querySelector('.combo-buttons').addEventListener('click', (e) => {
+            if (e.target.classList.contains('sound-btn')) {
+                const soundType = e.target.dataset.soundType;
+                this.playComboSound(soundType);
             }
         });
         
@@ -464,6 +478,36 @@ class UIManager {
         // Notify main app to play the oneshot sound
         if (this.callbacks.onOneshotSoundPlay) {
             this.callbacks.onOneshotSoundPlay(soundType);
+        }
+    }
+    
+    /**
+     * Play combo sound and set BPM
+     */
+    playComboSound(soundType) {
+        if (!this.soundConfig.validateSoundType(soundType, 'combo')) {
+            console.warn(`Invalid combo sound type: ${soundType}`);
+            return;
+        }
+        
+        const soundConfig = this.soundConfig.getSoundInfo(soundType);
+        if (soundConfig && soundConfig.bpm) {
+            // Extract the base sound name by removing the BPM suffix
+            let baseSoundName = soundConfig.label.replace(/\s+\d+$/, '');
+            
+            // Handle special cases where the base sound name might be different
+            if (baseSoundName === 'Heartbeat') {
+                baseSoundName = 'Heart Beat';
+            }
+            
+            // Set the sound type and BPM
+            this.setSoundType(baseSoundName);
+            this.setBpm(soundConfig.bpm);
+            
+            // Notify main app to apply the changes
+            if (this.callbacks.onComboSoundPlay) {
+                this.callbacks.onComboSoundPlay(soundType, soundConfig.bpm);
+            }
         }
     }
     

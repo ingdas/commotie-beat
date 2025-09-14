@@ -35,87 +35,101 @@
         </div>
         
         <div class="countdown-panel" id="countdownPanel" style="display: none;">
-            <div class="timer-display">
-                <div class="time" id="timerDisplay">30:00</div>
-                <div class="required-bpm" id="requiredBpmDisplay">Required BPM: ???</div>
-            </div>
-            
-            <div class="countdown-display">
-                <div class="number" id="countdownNumber">10</div>
-            </div>
-            
-            <div class="bpm-slider-container">
-                <div class="bpm-slider">
-                    <div class="slider-track" id="sliderTrack">
-                        <div class="slider-fill" id="sliderFill"></div>
-                        <div class="slider-thumb" id="sliderThumb"></div>
+            <div class="ui-grid">
+                <!-- Left Column - Main Controls -->
+                <div class="left-column">
+                    <div class="timer-display">
+                        <div class="time" id="timerDisplay">30:00</div>
+                        <div class="required-bpm" id="requiredBpmDisplay">Required BPM: ???</div>
                     </div>
-                    <div class="slider-labels">
-                        <span class="bpm-min">15</span>
-                        <span class="bpm-value" id="currentBpm">
-                            <span class="bpm-icon">⏱️</span>
-                            <span class="bpm-number">110</span>
-                        </span>
-                        <span class="bpm-max">200</span>
+                    
+                    <div class="countdown-display">
+                        <div class="number" id="countdownNumber">10</div>
+                    </div>
+                    
+                    <div class="bpm-slider-container">
+                        <div class="bpm-slider">
+                            <div class="slider-track" id="sliderTrack">
+                                <div class="slider-fill" id="sliderFill"></div>
+                                <div class="slider-thumb" id="sliderThumb"></div>
+                            </div>
+                            <div class="slider-labels">
+                                <span class="bpm-min">15</span>
+                                <span class="bpm-value" id="currentBpm">
+                                    <span class="bpm-icon">⏱️</span>
+                                    <span class="bpm-number">110</span>
+                                </span>
+                                <span class="bpm-max">200</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bpm-controls-section">
+                        <div class="bpm-controls">
+                            <button id="bpmDivideBtn" class="bpm-btn">/2</button>
+                            <button id="setRequiredBpmBtn" class="bpm-btn set-bpm-btn">110 BPM</button>
+                            <button id="bpmMultiplyBtn" class="bpm-btn">×2</button>
+                        </div>
+                        <div class="bpm-preset-controls">
+                            <button id="set60BpmBtn" class="bpm-preset-btn">60 BPM</button>
+                            <button id="set110BpmBtn" class="bpm-preset-btn">110 BPM</button>
+                        </div>
+                    </div>
+                    
+                    <div class="volume-slider-container">
+                        <div class="volume-slider">
+                            <div class="slider-track" id="volumeSliderTrack">
+                                <div class="slider-fill" id="volumeSliderFill"></div>
+                                <div class="slider-thumb" id="volumeSliderThumb"></div>
+                            </div>
+                            <div class="slider-labels">
+                                <span class="volume-min">5</span>
+                                <span class="volume-value" id="currentVolume">
+                                    <span class="volume-icon">🔊</span>
+                                    <span class="volume-number">80</span>
+                                </span>
+                                <span class="volume-max">100</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="controls">
+                        <button id="stopBtn" class="stop-btn">Pause</button>
+                        <button id="disableBtn" class="disable-btn">Disable 5s</button>
+                    </div>
+                </div>
+                
+                <!-- Right Column - Sound Configuration -->
+                <div class="right-column">
+                    <div class="sound-selection-controls">
+                        <label>Sound Type:</label>
+                        <div class="sound-buttons">
+                            <!-- Sound buttons will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="ending-selection-controls">
+                        <label>Ending:</label>
+                        <div class="ending-buttons">
+                            <!-- Ending buttons will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="oneshot-selection-controls">
+                        <label>OneShot Sounds:</label>
+                        <div class="oneshot-buttons">
+                            <!-- OneShot buttons will be generated dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="combo-selection-controls">
+                        <label>Sound + BPM Combos:</label>
+                        <div class="combo-buttons">
+                            <!-- Combo buttons will be generated dynamically -->
+                        </div>
                     </div>
                 </div>
             </div>
-            
-            <div class="bpm-controls-section">
-                <div class="bpm-controls">
-                    <button id="bpmDivideBtn" class="bpm-btn">/2</button>
-                    <button id="setRequiredBpmBtn" class="bpm-btn set-bpm-btn">110 BPM</button>
-                    <button id="bpmMultiplyBtn" class="bpm-btn">×2</button>
-                </div>
-                <div class="bpm-preset-controls">
-                    <button id="set60BpmBtn" class="bpm-preset-btn">60 BPM</button>
-                    <button id="set110BpmBtn" class="bpm-preset-btn">110 BPM</button>
-                </div>
-            </div>
-            
-            <div class="volume-slider-container">
-                <div class="volume-slider">
-                    <div class="slider-track" id="volumeSliderTrack">
-                        <div class="slider-fill" id="volumeSliderFill"></div>
-                        <div class="slider-thumb" id="volumeSliderThumb"></div>
-                    </div>
-                    <div class="slider-labels">
-                        <span class="volume-min">5</span>
-                        <span class="volume-value" id="currentVolume">
-                            <span class="volume-icon">🔊</span>
-                            <span class="volume-number">80</span>
-                        </span>
-                        <span class="volume-max">100</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="controls">
-                <button id="stopBtn" class="stop-btn">Pause</button>
-                <button id="disableBtn" class="disable-btn">Disable 5s</button>
-            </div>
-            
-            <div class="sound-selection-controls">
-                <label>Sound Type:</label>
-                <div class="sound-buttons">
-                    <!-- Sound buttons will be generated dynamically -->
-                </div>
-            </div>
-            
-            <div class="ending-selection-controls">
-                <label>Ending:</label>
-                <div class="ending-buttons">
-                    <!-- Ending buttons will be generated dynamically -->
-                </div>
-            </div>
-            
-            <div class="oneshot-selection-controls">
-                <label>OneShot Sounds:</label>
-                <div class="oneshot-buttons">
-                    <!-- OneShot buttons will be generated dynamically -->
-                </div>
-            </div>
-            
         </div>
         
     </div>

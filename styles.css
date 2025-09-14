@@ -21,7 +21,7 @@ body {
     padding: 2rem;
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
     text-align: center;
-    max-width: 500px;
+    max-width: 1000px;
     width: 90%;
 }
 
@@ -76,6 +76,28 @@ h1 {
 
 .setup-panel, .countdown-panel {
     margin-bottom: 2rem;
+}
+
+/* 2-Column Grid Layout */
+.ui-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.left-column, .right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.left-column {
+    text-align: center;
+}
+
+.right-column {
+    text-align: left;
 }
 
 .input-group {
@@ -284,6 +306,15 @@ input[type="number"]:focus {
     text-align: center;
 }
 
+.combo-selection-controls {
+    margin: 1.5rem 0;
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, rgba(168, 237, 234, 0.1) 0%, rgba(254, 214, 227, 0.1) 100%);
+    border-radius: 10px;
+    border: 2px solid rgba(168, 237, 234, 0.3);
+}
+
 .oneshot-selection-controls label {
     display: block;
     font-weight: 600;
@@ -292,7 +323,23 @@ input[type="number"]:focus {
     font-size: 1.1rem;
 }
 
+.combo-selection-controls label {
+    display: block;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+}
+
 .oneshot-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.combo-buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -319,6 +366,26 @@ input[type="number"]:focus {
     box-shadow: 0 6px 12px rgba(252, 182, 159, 0.4);
     background: linear-gradient(135deg, #fcb69f 0%, #ffecd2 100%);
     border-color: #fcb69f;
+}
+
+.combo-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    color: #4a5568;
+    margin: 0.25rem;
+}
+
+.combo-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(168, 237, 234, 0.4);
+    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+    border-color: #a8edea;
 }
 
 
@@ -573,10 +640,22 @@ input[type="number"]:focus {
 }
 
 
+@media (max-width: 768px) {
+    .ui-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .right-column {
+        text-align: center;
+    }
+}
+
 @media (max-width: 600px) {
     .container {
         padding: 1.5rem;
         width: 95%;
+        max-width: 500px;
     }
     
     h1 {
@@ -616,6 +695,10 @@ input[type="number"]:focus {
         margin: 0.25rem 0;
     }
     
+    .combo-btn {
+        width: 100%;
+        margin: 0.25rem 0;
+    }
     
     .bpm-slider, .volume-slider {
         width: 250px;

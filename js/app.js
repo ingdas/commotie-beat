@@ -303,6 +303,7 @@ class BeatCountdownTimer {
             onSoundTypeChanged: (soundType) => this.onSoundTypeChanged(soundType),
             onEndingSoundTypeChanged: (soundType) => this.onEndingSoundTypeChanged(soundType),
             onOneshotSoundPlay: (soundType) => this.onOneshotSoundPlay(soundType),
+            onComboSoundPlay: (soundType, bpm) => this.onComboSoundPlay(soundType, bpm),
             onVolumeChanged: (volume) => this.onVolumeChanged(volume)
         };
     }
@@ -509,6 +510,18 @@ class BeatCountdownTimer {
     onOneshotSoundPlay(soundType) {
         // Play the oneshot sound immediately
         this.audioManager.playOneshotSound(soundType);
+    }
+    
+    /**
+     * Handle combo sound play (sound + BPM combination)
+     */
+    onComboSoundPlay(soundType, bpm) {
+        // Apply the BPM change to the timer manager
+        this.applyBpmChange(bpm);
+        
+        // The UI manager already handles setting the sound type and BPM
+        // This callback is mainly for any additional logic needed
+        console.log(`Combo sound activated: ${soundType} at ${bpm} BPM`);
     }
     
     /**
