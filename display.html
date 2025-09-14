@@ -12,9 +12,9 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            color: #ff0000;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -22,113 +22,70 @@
             overflow: hidden;
         }
 
-        .display-container {
-            text-align: center;
-            padding: 2rem;
-        }
-
-        .title {
-            font-size: 3rem;
-            font-weight: bold;
-            margin-bottom: 2rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
-
         .beat-display {
-            font-size: 8rem;
+            font-size: 50vw;
             font-weight: bold;
-            margin: 2rem 0;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.4);
-            min-height: 120px;
+            text-align: center;
+            text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+            height: 100vh;
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
+            letter-spacing: 0.05em;
+            line-height: 0.8;
         }
 
         .beat-display.beat-animation {
-            animation: beatPulse 0.2s ease-in-out;
+            animation: bombCountdown 0.3s ease-in-out;
         }
 
-        @keyframes beatPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-
-        .status-info {
-            font-size: 1.5rem;
-            margin: 1rem 0;
-            opacity: 0.8;
+        @keyframes bombCountdown {
+            0% { 
+                transform: scale(1);
+                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+            }
+            50% { 
+                transform: scale(1.1);
+                text-shadow: 0 0 30px #ff0000, 0 0 60px #ff0000, 0 0 90px #ff0000;
+            }
+            100% { 
+                transform: scale(1);
+                text-shadow: 0 0 20px #ff0000, 0 0 40px #ff0000, 0 0 60px #ff0000;
+            }
         }
 
         .connection-status {
             position: fixed;
             top: 20px;
             right: 20px;
-            padding: 10px 20px;
-            border-radius: 25px;
-            font-size: 1rem;
+            padding: 5px 10px;
+            background-color: #ff0000;
+            color: #000000;
+            font-size: 0.8rem;
             font-weight: bold;
-        }
-
-        .connection-status.connected {
-            background-color: #4CAF50;
-            color: white;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #ff0000;
         }
 
         .connection-status.disconnected {
-            background-color: #f44336;
-            color: white;
+            background-color: #000000;
+            color: #ff0000;
+            border: 2px solid #ff0000;
         }
 
         .connection-status.connecting {
-            background-color: #ff9800;
-            color: white;
-        }
-
-        .bpm-info {
-            font-size: 2rem;
-            margin: 1rem 0;
-            opacity: 0.9;
-        }
-
-        .timer-info {
-            font-size: 1.8rem;
-            margin: 1rem 0;
-            opacity: 0.9;
-        }
-
-        .waiting-message {
-            font-size: 2rem;
-            margin: 2rem 0;
-            opacity: 0.7;
-            font-style: italic;
+            background-color: #ffaa00;
+            color: #000000;
+            border: 2px solid #ffaa00;
         }
     </style>
 </head>
 <body>
-    <div class="connection-status" id="connectionStatus">Connecting...</div>
+    <div class="connection-status" id="connectionStatus">CONNECTING</div>
     
-    <div class="display-container">
-        <h1 class="title">Commotie Beat</h1>
-        
-        <div class="beat-display" id="beatDisplay">
-            <span id="beatNumber">--</span>
-        </div>
-        
-        <div class="status-info" id="statusInfo">Waiting for connection...</div>
-        
-        <div class="bpm-info" id="bpmInfo" style="display: none;">
-            BPM: <span id="currentBpm">--</span>
-        </div>
-        
-        <div class="timer-info" id="timerInfo" style="display: none;">
-            Time: <span id="remainingTime">--:--</span>
-        </div>
-        
-        <div class="waiting-message" id="waitingMessage">
-            Waiting for beat data...
-        </div>
+    <div class="beat-display" id="beatDisplay">
+        <span id="beatNumber">--</span>
     </div>
 
     <script>
@@ -142,13 +99,7 @@
                 this.elements = {
                     connectionStatus: document.getElementById('connectionStatus'),
                     beatDisplay: document.getElementById('beatDisplay'),
-                    beatNumber: document.getElementById('beatNumber'),
-                    statusInfo: document.getElementById('statusInfo'),
-                    bpmInfo: document.getElementById('bpmInfo'),
-                    timerInfo: document.getElementById('timerInfo'),
-                    currentBpm: document.getElementById('currentBpm'),
-                    remainingTime: document.getElementById('remainingTime'),
-                    waitingMessage: document.getElementById('waitingMessage')
+                    beatNumber: document.getElementById('beatNumber')
                 };
                 
                 this.connect();
@@ -164,9 +115,7 @@
                     
                     this.ws.onopen = () => {
                         console.log('Connected to beat server');
-                        this.updateConnectionStatus('connected', 'Connected');
-                        this.elements.statusInfo.textContent = 'Connected to beat server';
-                        this.elements.waitingMessage.style.display = 'block';
+                        this.updateConnectionStatus('connected', 'CONNECTED');
                         this.reconnectAttempts = 0;
                         
                         if (this.reconnectInterval) {
@@ -186,35 +135,32 @@
                     
                     this.ws.onclose = () => {
                         console.log('Disconnected from beat server');
-                        this.updateConnectionStatus('disconnected', 'Disconnected');
-                        this.elements.statusInfo.textContent = 'Disconnected from beat server';
-                        this.elements.waitingMessage.style.display = 'block';
+                        this.updateConnectionStatus('disconnected', 'DISCONNECTED');
                         this.scheduleReconnect();
                     };
                     
                     this.ws.onerror = (error) => {
                         console.error('WebSocket error:', error);
-                        this.updateConnectionStatus('disconnected', 'Connection Error');
+                        this.updateConnectionStatus('disconnected', 'ERROR');
                     };
                     
                 } catch (error) {
                     console.error('Failed to create WebSocket connection:', error);
-                    this.updateConnectionStatus('disconnected', 'Connection Failed');
+                    this.updateConnectionStatus('disconnected', 'FAILED');
                     this.scheduleReconnect();
                 }
             }
             
             scheduleReconnect() {
                 if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-                    this.updateConnectionStatus('disconnected', 'Max Reconnect Attempts');
-                    this.elements.statusInfo.textContent = 'Unable to connect to beat server';
+                    this.updateConnectionStatus('disconnected', 'NO CONNECTION');
                     return;
                 }
                 
                 this.reconnectAttempts++;
                 const delay = Math.min(1000 * Math.pow(2, this.reconnectAttempts), 30000);
                 
-                this.updateConnectionStatus('connecting', `Reconnecting... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
+                this.updateConnectionStatus('connecting', 'CONNECTING');
                 
                 this.reconnectInterval = setTimeout(() => {
                     this.connect();
@@ -227,40 +173,15 @@
             }
             
             updateDisplay(data) {
-                // Update beat count
+                // Update beat count only
                 if (data.countdown !== undefined) {
                     this.elements.beatNumber.textContent = data.countdown;
-                    this.elements.waitingMessage.style.display = 'none';
                     
-                    // Trigger beat animation
+                    // Trigger bomb countdown animation
                     this.elements.beatDisplay.classList.remove('beat-animation');
                     setTimeout(() => {
                         this.elements.beatDisplay.classList.add('beat-animation');
                     }, 10);
-                }
-                
-                // Update BPM
-                if (data.bpm !== undefined) {
-                    this.elements.currentBpm.textContent = data.bpm;
-                    this.elements.bpmInfo.style.display = 'block';
-                }
-                
-                // Update timer
-                if (data.remainingTimeSeconds !== undefined) {
-                    const minutes = Math.floor(data.remainingTimeSeconds / 60);
-                    const seconds = data.remainingTimeSeconds % 60;
-                    this.elements.remainingTime.textContent = 
-                        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                    this.elements.timerInfo.style.display = 'block';
-                }
-                
-                // Update status
-                if (data.isRunning !== undefined) {
-                    if (data.isRunning) {
-                        this.elements.statusInfo.textContent = 'Timer Running';
-                    } else {
-                        this.elements.statusInfo.textContent = 'Timer Stopped';
-                    }
                 }
             }
         }
