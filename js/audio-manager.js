@@ -9,6 +9,7 @@ class AudioManager {
         this.audioBuffers = {};
         this.soundAlternationCounters = {};
         this.volume = 50; // Default volume 50%
+        this.audioInitialized = false; // Track if audio has been initialized
         
         this.initializeAudio();
     }
@@ -392,5 +393,44 @@ class AudioManager {
      */
     getCurrentTime() {
         return this.audioContext ? this.audioContext.currentTime : 0;
+    }
+    
+    /**
+     * Initialize audio device by playing a silent sound
+     * This ensures the audio device is properly started for future audio playback
+     */
+    initializeAudioDevice() {
+        if (this.audioInitialized || !this.audioContext) {
+            return;
+        }
+        
+        try {
+            // Resume audio context if suspended
+            if (this.audioContext.state === 'suspended') {
+                this.audioContext.resume();
+            }
+            
+            // Create a very short silent audio buffer
+            const bufferLength = this.audioContext.sampleRate * 0.1; // 0.1 seconds
+            const buffer = this.audioContext.createBuffer(1, bufferLength, this.audioContext.sampleRate);
+            
+            // Play the silent buffer
+            const source = this.audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(this.audioContext.destination);
+            source.start();
+            
+            this.audioInitialized = true;
+            console.log('Audio device initialized with silent sound');
+        } catch (error) {
+            console.warn('Failed to initialize audio device:', error);
+        }
+    }
+    
+    /**
+     * Check if audio has been initialized
+     */
+    isAudioInitialized() {
+        return this.audioInitialized;
     }
 }

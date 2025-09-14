@@ -41,6 +41,9 @@ class BeatCountdownTimer {
         // Set up opening sound button
         this.setupOpeningSoundButton();
         
+        // Set up audio initialization on first click
+        this.setupAudioInitialization();
+        
         // Initialize WebSocket connection
         this.initializeWebSocket();
         
@@ -74,6 +77,25 @@ class BeatCountdownTimer {
                 this.stopAllOpeningSounds();
             });
         }
+    }
+    
+    /**
+     * Set up audio initialization on first click anywhere on the page
+     */
+    setupAudioInitialization() {
+        // Add a one-time click listener to the document
+        const handleFirstClick = () => {
+            // Initialize audio device with silent sound
+            this.audioManager.initializeAudioDevice();
+            
+            // Remove the event listener after first use
+            document.removeEventListener('click', handleFirstClick);
+            document.removeEventListener('touchstart', handleFirstClick);
+        };
+        
+        // Listen for both click and touchstart events to cover all user interactions
+        document.addEventListener('click', handleFirstClick, { once: true });
+        document.addEventListener('touchstart', handleFirstClick, { once: true });
     }
     
     /**
