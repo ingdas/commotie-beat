@@ -285,6 +285,11 @@ class UIManager {
             this.volume = clampedVolume;
             this.elements.volumeNumber.textContent = clampedVolume;
             this.updateVolumeSliderPosition(clampedVolume);
+            
+            // Notify audio manager of volume change
+            if (this.callbacks.onVolumeChanged) {
+                this.callbacks.onVolumeChanged(clampedVolume);
+            }
         };
         
         // Mouse events
@@ -561,6 +566,11 @@ class UIManager {
         this.volume = volume;
         this.elements.volumeNumber.textContent = volume;
         this.updateVolumeSliderPosition(volume);
+        
+        // Notify audio manager of volume change
+        if (this.callbacks.onVolumeChanged) {
+            this.callbacks.onVolumeChanged(volume);
+        }
     }
     
     /**
