@@ -10,11 +10,11 @@ class SoundConfig {
                 label: 'Thump'
             },
             {
-                url: './kickdrum.wav',
+                url: './sounds/kickdrum.wav',
                 label: 'Kick Drum'
             },
             {
-                url: './dream.wav',
+                url: './sounds/dream.wav',
                 label: 'Dreamy'
             },
             {
@@ -22,15 +22,15 @@ class SoundConfig {
                 label: 'Heart Beat'
             },
             {
-                urls: ['./clock1.wav', './clock2.wav'],
+                urls: ['./sounds/clock1.wav', './sounds/clock2.wav'],
                 label: 'Clock'
             },
             {
-                url: './metronome.wav',
+                url: './sounds/metronome.wav',
                 label: 'Metronome'
             },
             {
-                url: './water.mp3',
+                url: './sounds/water.mp3',
                 label: 'Water Drop'
             },
             {
@@ -38,7 +38,7 @@ class SoundConfig {
                 label: 'Alarm'
             },
             {
-                url: './boom.mp3',
+                url: './sounds/boom.mp3',
                 label: 'Boom',
                 type: 'end'
             },
