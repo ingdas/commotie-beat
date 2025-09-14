@@ -105,10 +105,10 @@
     <div class="connection-status" id="connectionStatus">CONNECTING</div>
     
     <div class="beat-display" id="beatDisplay">
-        <span class="digit" id="digit1">0</span>
-        <span class="digit" id="digit2">0</span>
-        <span class="digit" id="digit3">0</span>
-        <span class="digit" id="digit4">0</span>
+        <span class="digit" id="digit1"></span>
+        <span class="digit" id="digit2"></span>
+        <span class="digit" id="digit3"></span>
+        <span class="digit" id="digit4"></span>
     </div>
 
     <script>
@@ -199,6 +199,16 @@
             }
             
             updateDisplay(data) {
+                // Handle blank screen signal
+                if (data.type === 'blank' || data.countdown === null) {
+                    // Show blank screen
+                    this.elements.digit1.textContent = '';
+                    this.elements.digit2.textContent = '';
+                    this.elements.digit3.textContent = '';
+                    this.elements.digit4.textContent = '';
+                    return;
+                }
+                
                 // Update beat count only
                 if (data.countdown !== undefined) {
                     // Format as 4-digit number with leading zeros

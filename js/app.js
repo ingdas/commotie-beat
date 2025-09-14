@@ -277,6 +277,9 @@ class BeatCountdownTimer {
         
         // Reset counter tracking
         this.previousCountdown = null;
+        
+        // Send blank screen signal when reset
+        this.sendBlankScreenSignal();
     }
     
     /**
@@ -447,6 +450,9 @@ class BeatCountdownTimer {
                     clearInterval(this.wsReconnectInterval);
                     this.wsReconnectInterval = null;
                 }
+                
+                // Send blank screen signal when connected
+                this.sendBlankScreenSignal();
             };
             
             this.ws.onclose = () => {
@@ -494,12 +500,28 @@ class BeatCountdownTimer {
     }
     
     /**
+     * Send blank screen signal to display devices
+     */
+    sendBlankScreenSignal() {
+        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            const data = {
+                type: 'blank',
+                countdown: null,
+                timestamp: Date.now()
+            };
+            
+            this.ws.send(JSON.stringify(data));
+        }
+    }
+    
+    /**
      * Broadcast beat data to display devices
      */
     broadcastBeatData() {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             const state = this.timerManager.getState();
             const data = {
+                type: 'countdown',
                 countdown: state.countdown,
                 timestamp: Date.now()
             };
