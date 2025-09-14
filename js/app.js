@@ -203,15 +203,18 @@ class BeatCountdownTimer {
         
         const selectedSound = this.uiManager.getSelectedSound();
         
+        // Always start at 110 BPM regardless of input field value
+        const startingBpm = 110;
+        
         // Start the timer
-        this.timerManager.startCountdown(durationValue, initialBpmValue, selectedSound);
+        this.timerManager.startCountdown(durationValue, startingBpm, selectedSound);
         
         // Reset counter tracking for new countdown
         this.previousCountdown = null;
         
         // Update UI
-        this.uiManager.setBpm(initialBpmValue);
-        this.uiManager.updateSliderPosition(initialBpmValue);
+        this.uiManager.setBpm(startingBpm);
+        this.uiManager.updateSliderPosition(startingBpm);
         this.uiManager.updateVolumeSliderPosition(this.uiManager.getVolume());
         this.uiManager.showCountdownPanel();
     }
@@ -241,9 +244,12 @@ class BeatCountdownTimer {
     resetCountdown() {
         const initialBpmValue = this.uiManager.getInitialBpmValue();
         
-        this.timerManager.resetCountdown(initialBpmValue);
-        this.uiManager.setBpm(initialBpmValue);
-        this.uiManager.updateSliderPosition(initialBpmValue);
+        // Always reset to 110 BPM regardless of input field value
+        const startingBpm = 110;
+        
+        this.timerManager.resetCountdown(startingBpm);
+        this.uiManager.setBpm(startingBpm);
+        this.uiManager.updateSliderPosition(startingBpm);
         this.uiManager.reset();
         this.uiManager.showSetupPanel();
         

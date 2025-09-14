@@ -10,6 +10,10 @@ class SoundConfig {
                 label: 'Thump'
             },
             {
+                urls: ['./sounds/drumloop1.mp3', './sounds/drumloop2.mp3'],
+                label: 'Opening Loop'
+            },
+            {
                 url: './sounds/kickdrum.wav',
                 label: 'Kick Drum'
             },

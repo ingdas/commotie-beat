@@ -8,9 +8,9 @@ class UIManager {
         this.callbacks = callbacks; // Object containing callback functions from main app
         
         // UI state
-        this.selectedSound = 'Thump';
+        this.selectedSound = 'Opening Loop';
         this.selectedEndingSound = 'Silent';
-        this.bpm = 120;
+        this.bpm = 110;
         this.volume = 50;
         
         // DOM elements
@@ -577,9 +577,9 @@ class UIManager {
      * Reset UI to initial state
      */
     reset() {
-        this.selectedSound = 'Thump';
+        this.selectedSound = 'Opening Loop';
         this.selectedEndingSound = 'Silent';
-        this.setSoundType('Thump');
+        this.setSoundType('Opening Loop');
         this.setEndingSoundType('Silent');
         this.updateStopButton(true);
     }
