@@ -57,6 +57,10 @@ class UIManager {
             bpmDivideBtn: document.getElementById('bpmDivideBtn'),
             setRequiredBpmBtn: document.getElementById('setRequiredBpmBtn'),
             
+            // BPM preset buttons
+            set60BpmBtn: document.getElementById('set60BpmBtn'),
+            set110BpmBtn: document.getElementById('set110BpmBtn'),
+            
             // MIDI status elements
             midiStatus: document.getElementById('midiStatus'),
             midiIndicator: document.getElementById('midiIndicator'),
@@ -194,6 +198,10 @@ class UIManager {
         this.elements.bpmMultiplyBtn.addEventListener('click', () => this.callbacks.multiplyBpm());
         this.elements.bpmDivideBtn.addEventListener('click', () => this.callbacks.divideBpm());
         this.elements.setRequiredBpmBtn.addEventListener('click', () => this.callbacks.setToRequiredBpm());
+        
+        // BPM preset buttons
+        this.elements.set60BpmBtn.addEventListener('click', () => this.callbacks.set60Bpm());
+        this.elements.set110BpmBtn.addEventListener('click', () => this.callbacks.set110Bpm());
     }
     
     /**

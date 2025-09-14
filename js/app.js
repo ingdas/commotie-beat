@@ -297,6 +297,8 @@ class BeatCountdownTimer {
             multiplyBpm: () => this.multiplyBpm(),
             divideBpm: () => this.divideBpm(),
             setToRequiredBpm: () => this.setToRequiredBpm(),
+            set60Bpm: () => this.set60Bpm(),
+            set110Bpm: () => this.set110Bpm(),
             applyBpmChange: (bpm) => this.applyBpmChange(bpm),
             onSoundTypeChanged: (soundType) => this.onSoundTypeChanged(soundType),
             onEndingSoundTypeChanged: (soundType) => this.onEndingSoundTypeChanged(soundType),
@@ -452,6 +454,24 @@ class BeatCountdownTimer {
         const selectedSound = this.uiManager.getSelectedSound();
         const newBpm = this.timerManager.setToRequiredBpm(selectedSound);
         this.uiManager.setBpm(newBpm);
+    }
+    
+    /**
+     * Set BPM to 60
+     */
+    set60Bpm() {
+        const selectedSound = this.uiManager.getSelectedSound();
+        this.timerManager.updateBpm(60, selectedSound);
+        this.uiManager.setBpm(60);
+    }
+    
+    /**
+     * Set BPM to 110
+     */
+    set110Bpm() {
+        const selectedSound = this.uiManager.getSelectedSound();
+        this.timerManager.updateBpm(110, selectedSound);
+        this.uiManager.setBpm(110);
     }
     
     /**
