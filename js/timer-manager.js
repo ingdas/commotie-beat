@@ -117,7 +117,8 @@ class TimerManager {
             this.nextBeatTime += this.beatInterval;
             this.countdown--;
             
-            if (this.countdown <= 0) {
+            // Only break after scheduling the final beat (countdown 0)
+            if (this.countdown < 0) {
                 break;
             }
         }
@@ -147,10 +148,17 @@ class TimerManager {
                 console.log(`Timing error: ${(timingError * 1000).toFixed(2)}ms`);
             }
             this.triggerBeatAnimation();
+            
+            // Check if this was the final beat (beat number equals original countdown)
+            if (audioBeat.beatNumber === this.originalCountdown) {
+                this.stopCountdown();
+                this.showCompletion();
+                return;
+            }
         }
         
-        // Check if we're done
-        if (this.countdown <= 0) {
+        // Check if we're done (only after all scheduled beats are processed)
+        if (this.countdown < 0) {
             this.stopCountdown();
             this.showCompletion();
             return;
