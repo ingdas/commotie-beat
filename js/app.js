@@ -560,7 +560,7 @@ class BeatCountdownTimer {
      * Decrease BPM (for MIDI)
      */
     decreaseBPM() {
-        const newBpm = Math.max(30, this.timerManager.bpm - 1);
+        const newBpm = Math.max(15, this.timerManager.bpm - 1);
         const selectedSound = this.uiManager.getSelectedSound();
         this.timerManager.updateBpm(newBpm, selectedSound);
         this.uiManager.setBpm(newBpm);
@@ -579,7 +579,7 @@ class BeatCountdownTimer {
      * Decrease Volume (for MIDI)
      */
     decreaseVolume() {
-        const newVolume = Math.max(20, this.uiManager.getVolume() - 1);
+        const newVolume = Math.max(5, this.uiManager.getVolume() - 1);
         this.uiManager.setVolume(newVolume);
         this.audioManager.setVolume(newVolume);
     }

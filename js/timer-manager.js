@@ -301,7 +301,7 @@ class TimerManager {
      */
     setToRequiredBpm(selectedSound) {
         const requiredBpm = this.calculateRequiredBpm();
-        const clampedBpm = Math.max(30, Math.min(200, requiredBpm));
+        const clampedBpm = Math.max(15, Math.min(200, requiredBpm));
         
         this.updateBpm(clampedBpm, selectedSound);
         return clampedBpm;
@@ -320,7 +320,7 @@ class TimerManager {
      * Divide BPM by 2
      */
     divideBpm(selectedSound) {
-        const newBpm = Math.max(30, Math.round(this.bpm / 2));
+        const newBpm = Math.max(15, Math.round(this.bpm / 2));
         this.updateBpm(newBpm, selectedSound);
         return newBpm;
     }

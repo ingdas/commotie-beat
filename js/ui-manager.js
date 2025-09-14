@@ -11,7 +11,7 @@ class UIManager {
         this.selectedSound = 'Opening Loop';
         this.selectedEndingSound = 'Boom';
         this.bpm = 110;
-        this.volume = 50;
+        this.volume = 80;
         
         // DOM elements
         this.elements = {};
@@ -120,7 +120,9 @@ class UIManager {
         this.elements.startBtn.addEventListener('click', () => this.callbacks.startCountdown());
         this.elements.stopBtn.addEventListener('click', () => this.callbacks.toggleStopResume());
         this.elements.disableBtn.addEventListener('click', () => this.callbacks.disableTimer());
-        this.elements.resetBtn.addEventListener('click', () => this.callbacks.resetCountdown());
+        if (this.elements.resetBtn) {
+            this.elements.resetBtn.addEventListener('click', () => this.callbacks.resetCountdown());
+        }
         
         // Sound selection controls - use event delegation for dynamic buttons
         document.querySelector('.sound-buttons').addEventListener('click', (e) => {
@@ -192,8 +194,8 @@ class UIManager {
         };
         
         const updateBpmFromPosition = (position) => {
-            const newBpm = Math.round(30 + position * 170);
-            const clampedBpm = Math.max(30, Math.min(200, newBpm));
+            const newBpm = Math.round(15 + position * 185);
+            const clampedBpm = Math.max(15, Math.min(200, newBpm));
             
             this.bpm = clampedBpm;
             this.elements.bpmNumber.textContent = clampedBpm;
@@ -279,8 +281,8 @@ class UIManager {
         };
         
         const updateVolumeFromPosition = (position) => {
-            const newVolume = Math.round(20 + position * 80); // Map 0-1 to 20-100
-            const clampedVolume = Math.max(20, Math.min(100, newVolume));
+            const newVolume = Math.round(5 + position * 95); // Map 0-1 to 5-100
+            const clampedVolume = Math.max(5, Math.min(100, newVolume));
             
             this.volume = clampedVolume;
             this.elements.volumeNumber.textContent = clampedVolume;
@@ -349,7 +351,7 @@ class UIManager {
      * Update BPM slider position
      */
     updateSliderPosition(bpm) {
-        const position = (bpm - 30) / 170;
+        const position = (bpm - 15) / 185;
         const percentage = position * 100;
         
         this.elements.sliderThumb.style.left = `${percentage}%`;
@@ -360,7 +362,7 @@ class UIManager {
      * Update volume slider position
      */
     updateVolumeSliderPosition(volume) {
-        const percentage = ((volume - 20) / 80) * 100;
+        const percentage = ((volume - 5) / 95) * 100;
         
         this.elements.volumeSliderThumb.style.left = `${percentage}%`;
         this.elements.volumeSliderFill.style.width = `${percentage}%`;
