@@ -23,7 +23,7 @@ class TimerManager {
         this.nextBeatTime = 0;
         this.beatInterval = 0;
         this.lastScheduledBeat = 0;
-        this.lookaheadTime = 0.5; // Schedule beats ahead (seconds)
+        this.lookaheadTime = 0.2; // Schedule beats ahead (seconds)
         
         // Timer interval for countdown display
         this.timerInterval = null;
@@ -270,23 +270,10 @@ class TimerManager {
     updateBpm(newBpm, selectedSound) {
         this.bpm = newBpm;
         
-        // Update the beat interval for MIDI-like scheduling
+        // Update the beat interval for new beats
         if (this.isRunning) {
-            const oldBeatInterval = this.beatInterval;
             this.beatInterval = 60 / this.bpm;
-            
-            // Clear scheduled beats to prevent duplicate audio when tempo changes
-            this.scheduledBeats = [];
-            this.scheduledVisualBeats = [];
-            
-            // Update nextBeatTime to maintain rhythm continuity
-            // Calculate how many beats have passed since the last scheduled beat
-            const currentTime = this.audioManager.getCurrentTime();
-            const timeSinceLastBeat = currentTime - (this.nextBeatTime - oldBeatInterval);
-            const beatsSinceLastBeat = Math.floor(timeSinceLastBeat / this.beatInterval);
-            
-            // Set nextBeatTime to the next beat in the new tempo
-            this.nextBeatTime = currentTime + (this.beatInterval - (timeSinceLastBeat % this.beatInterval));
+            // Let the existing schedulerLoop handle scheduling new beats at the new tempo
         }
         
         this.updateDisplay();
@@ -304,7 +291,7 @@ class TimerManager {
      */
     setToRequiredBpm(selectedSound) {
         const requiredBpm = this.calculateRequiredBpm();
-        const clampedBpm = Math.max(15, Math.min(200, requiredBpm));
+        const clampedBpm = window.bpmConfig.clampBpm(requiredBpm);
         
         this.updateBpm(clampedBpm, selectedSound);
         return clampedBpm;
@@ -314,7 +301,7 @@ class TimerManager {
      * Multiply BPM by 2
      */
     multiplyBpm(selectedSound) {
-        const newBpm = Math.min(200, this.bpm * 2);
+        const newBpm = window.bpmConfig.clampBpm(this.bpm * 2);
         this.updateBpm(newBpm, selectedSound);
         return newBpm;
     }
@@ -323,7 +310,7 @@ class TimerManager {
      * Divide BPM by 2
      */
     divideBpm(selectedSound) {
-        const newBpm = Math.max(15, Math.round(this.bpm / 2));
+        const newBpm = window.bpmConfig.clampBpm(Math.round(this.bpm / 2));
         this.updateBpm(newBpm, selectedSound);
         return newBpm;
     }
@@ -406,6 +393,40 @@ class TimerManager {
         this.disableTimeout = setTimeout(() => {
             this.enableTimer();
         }, 5000);
+    }
+    
+    /**
+     * Disable timer indefinitely (no auto re-enable)
+     */
+    disableTimerIndefinitely() {
+        if (!this.isRunning || this.isDisabled) {
+            return; // Can't disable if not running or already disabled
+        }
+        
+        this.isDisabled = true;
+        
+        // Stop only the beat scheduling (audio and visual beats)
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        
+        // Clear scheduled beats to prevent them from being processed when we resume
+        this.scheduledBeats = [];
+        this.scheduledVisualBeats = [];
+        
+        // Keep the countdown timer running - don't stop timerInterval
+        
+        // Clear any existing disable timeout
+        if (this.disableTimeout) {
+            clearTimeout(this.disableTimeout);
+            this.disableTimeout = null;
+        }
+        
+        // Notify UI
+        if (this.callbacks.onTimerDisabledIndefinitely) {
+            this.callbacks.onTimerDisabledIndefinitely();
+        }
     }
     
     /**

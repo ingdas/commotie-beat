@@ -59,7 +59,7 @@
                                     <span class="bpm-icon">⏱️</span>
                                     <span class="bpm-number">110</span>
                                 </span>
-                                <span class="bpm-max">200</span>
+                                <span class="bpm-max">300</span>
                             </div>
                         </div>
                     </div>
@@ -73,6 +73,11 @@
                         <div class="bpm-preset-controls">
                             <button id="set60BpmBtn" class="bpm-preset-btn">60 BPM</button>
                             <button id="set110BpmBtn" class="bpm-preset-btn">110 BPM</button>
+                        </div>
+                        <div class="tap-tempo-controls">
+                            <div class="tap-tempo-instructions">Press Shift 4 times to set BPM by tapping</div>
+                            <div id="tapTempoIndicator" class="tap-tempo-indicator" style="display: none;">Tap Tempo: 0/4</div>
+                            <div id="suggestedBpmDisplay" class="suggested-bpm-display" style="display: none;">Suggested: 120 BPM (Press Enter to apply)</div>
                         </div>
                     </div>
                     
@@ -120,6 +125,7 @@
                         <div class="oneshot-buttons">
                             <!-- OneShot buttons will be generated dynamically -->
                         </div>
+                        <button id="stopOneshotBtn" class="oneshot-stop-btn">⏹️ Stop OneShot Sounds</button>
                     </div>
                     
                     <div class="combo-selection-controls">
@@ -135,6 +141,7 @@
     </div>
     
     <!-- Load JavaScript modules in dependency order -->
+    <script src="js/bpm-config.js"></script>
     <script src="js/sound-config.js"></script>
     <script src="js/audio-manager.js"></script>
     <script src="js/midi-manager.js"></script>
