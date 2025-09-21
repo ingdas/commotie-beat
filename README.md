@@ -5,11 +5,11 @@ A rhythmic countdown timer that synchronizes beats with a countdown timer, now w
 ## Features
 
 - **Duration Input**: Set your target duration in minutes
-- **Initial BPM Input**: Set your desired initial BPM (30-200)
+- **Initial BPM Input**: Set your desired initial BPM (15-300)
 - **Countdown Timer**: Visual countdown showing minutes and seconds remaining
 - **Beat Counter**: Countdown number that decreases with each beat
 - **BPM Calculation**: Displays the required BPM to finish exactly when the timer reaches zero
-- **Interactive BPM Slider**: Adjust the BPM in real-time (30-200 BPM)
+- **Interactive BPM Slider**: Adjust the BPM in real-time (15-300 BPM)
 - **Volume Control**: Adjust the volume of the beat sound (20-100%)
 - **Audio Feedback**: Bass drum sound on each beat
 - **Visual Feedback**: Beat indicator animation and number scaling
@@ -21,7 +21,7 @@ A rhythmic countdown timer that synchronizes beats with a countdown timer, now w
 ## How It Works
 
 1. Enter your target duration in minutes
-2. Enter your desired initial BPM (30-200)
+2. Enter your desired initial BPM (15-300)
 3. Click "Start Timer" to begin
 4. The app will:
    - Start a countdown timer showing minutes:seconds

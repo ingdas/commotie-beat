@@ -253,8 +253,8 @@ class UIManager {
         };
         
         const updateBpmFromPosition = (position) => {
-            const newBpm = Math.round(15 + position * 185);
-            const clampedBpm = Math.max(15, Math.min(200, newBpm));
+            const newBpm = window.bpmConfig.sliderPositionToBpm(position);
+            const clampedBpm = window.bpmConfig.clampBpm(newBpm);
             
             this.bpm = clampedBpm;
             this.elements.bpmNumber.textContent = clampedBpm;
@@ -410,7 +410,7 @@ class UIManager {
      * Update BPM slider position
      */
     updateSliderPosition(bpm) {
-        const position = (bpm - 15) / 185;
+        const position = window.bpmConfig.bpmToSliderPosition(bpm);
         const percentage = position * 100;
         
         this.elements.sliderThumb.style.left = `${percentage}%`;
@@ -742,7 +742,7 @@ class UIManager {
         const calculatedBpm = Math.round(60000 / averageInterval);
         
         // Clamp BPM to valid range
-        this.suggestedBpm = Math.max(15, Math.min(200, calculatedBpm));
+        this.suggestedBpm = window.bpmConfig.clampBpm(calculatedBpm);
         
         // Update display
         this.updateSuggestedBpmDisplay();
