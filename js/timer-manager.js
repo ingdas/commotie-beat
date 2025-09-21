@@ -396,6 +396,40 @@ class TimerManager {
     }
     
     /**
+     * Disable timer indefinitely (no auto re-enable)
+     */
+    disableTimerIndefinitely() {
+        if (!this.isRunning || this.isDisabled) {
+            return; // Can't disable if not running or already disabled
+        }
+        
+        this.isDisabled = true;
+        
+        // Stop only the beat scheduling (audio and visual beats)
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+        
+        // Clear scheduled beats to prevent them from being processed when we resume
+        this.scheduledBeats = [];
+        this.scheduledVisualBeats = [];
+        
+        // Keep the countdown timer running - don't stop timerInterval
+        
+        // Clear any existing disable timeout
+        if (this.disableTimeout) {
+            clearTimeout(this.disableTimeout);
+            this.disableTimeout = null;
+        }
+        
+        // Notify UI
+        if (this.callbacks.onTimerDisabledIndefinitely) {
+            this.callbacks.onTimerDisabledIndefinitely();
+        }
+    }
+    
+    /**
      * Re-enable timer after disable period
      */
     enableTimer() {

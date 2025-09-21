@@ -319,6 +319,7 @@ class BeatCountdownTimer {
             onCountdownResumed: () => this.onCountdownResumed(),
             onCountdownReset: () => this.onCountdownReset(),
             onTimerDisabled: () => this.onTimerDisabled(),
+            onTimerDisabledIndefinitely: () => this.onTimerDisabledIndefinitely(),
             onTimerEnabled: () => this.onTimerEnabled(),
             updateDisplay: (countdown, bpm, requiredBpm) => {
                 this.uiManager.updateDisplay(countdown, bpm, requiredBpm);
@@ -390,14 +391,22 @@ class BeatCountdownTimer {
     }
     
     /**
-     * Toggle stop/resume
+     * Stop the timer and disable it indefinitely (like disable 5s but permanent)
+     * Or resume if currently disabled
      */
     toggleStopResume() {
-        if (this.timerManager.isRunning) {
-            this.timerManager.stopCountdown();
-        } else {
+        const state = this.timerManager.getState();
+        
+        if (state.isDisabled) {
+            // Timer is disabled, resume it
             const selectedSound = this.uiManager.getSelectedSound();
-            this.timerManager.resumeCountdown(selectedSound);
+            this.timerManager.enableTimer();
+        } else if (state.isRunning) {
+            // Timer is running, disable it indefinitely
+            this.timerManager.disableTimerIndefinitely();
+        } else {
+            // Timer is not running, reset it
+            this.resetCountdown();
         }
     }
     
@@ -583,10 +592,19 @@ class BeatCountdownTimer {
     }
     
     /**
+     * Handle timer disabled indefinitely
+     */
+    onTimerDisabledIndefinitely() {
+        this.uiManager.updateStopButton(false); // Show "Resume" button
+        this.broadcastBeatData();
+    }
+    
+    /**
      * Handle timer enabled
      */
     onTimerEnabled() {
         this.uiManager.updateDisableButton(false);
+        this.uiManager.updateStopButton(true); // Show "Stop" button when resumed
         this.broadcastBeatData();
     }
     
@@ -602,7 +620,7 @@ class BeatCountdownTimer {
      * Increase BPM (for MIDI)
      */
     increaseBPM() {
-        const newBpm = window.bpmConfig.clampBpm(this.timerManager.bpm + 1);
+        const newBpm = Math.min(200, this.timerManager.bpm + 1);
         const selectedSound = this.uiManager.getSelectedSound();
         this.timerManager.updateBpm(newBpm, selectedSound);
         this.uiManager.setBpm(newBpm);
@@ -612,7 +630,7 @@ class BeatCountdownTimer {
      * Decrease BPM (for MIDI)
      */
     decreaseBPM() {
-        const newBpm = window.bpmConfig.clampBpm(this.timerManager.bpm - 1);
+        const newBpm = Math.max(15, this.timerManager.bpm - 1);
         const selectedSound = this.uiManager.getSelectedSound();
         this.timerManager.updateBpm(newBpm, selectedSound);
         this.uiManager.setBpm(newBpm);
