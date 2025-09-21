@@ -13,6 +13,12 @@ class UIManager {
         this.bpm = 110;
         this.volume = 80;
         
+        // Tap tempo state
+        this.tapTimes = [];
+        this.tapCount = 0;
+        this.suggestedBpm = null;
+        this.isTapTempoMode = false;
+        
         // DOM elements
         this.elements = {};
         
@@ -67,7 +73,11 @@ class UIManager {
             midiText: document.getElementById('midiText'),
             
             // Oneshot stop button
-            stopOneshotBtn: document.getElementById('stopOneshotBtn')
+            stopOneshotBtn: document.getElementById('stopOneshotBtn'),
+            
+            // Tap tempo elements
+            tapTempoIndicator: document.getElementById('tapTempoIndicator'),
+            suggestedBpmDisplay: document.getElementById('suggestedBpmDisplay')
         };
         
         // Sound buttons will be generated dynamically
@@ -224,6 +234,9 @@ class UIManager {
         if (this.elements.stopOneshotBtn) {
             this.elements.stopOneshotBtn.addEventListener('click', () => this.callbacks.onOneshotSoundStop());
         }
+        
+        // Keyboard event listeners for tap tempo
+        document.addEventListener('keydown', (e) => this.handleKeyDown(e));
     }
     
     /**
@@ -668,6 +681,136 @@ class UIManager {
     }
     
     /**
+     * Handle keyboard input for tap tempo
+     */
+    handleKeyDown(e) {
+        // Handle Shift key for tap tempo
+        if (e.key === 'Shift' && !e.repeat) {
+            this.handleTapTempo();
+        }
+        
+        // Handle Enter key to confirm suggested BPM
+        if (e.key === 'Enter' && this.isTapTempoMode && this.suggestedBpm) {
+            this.confirmSuggestedBpm();
+        }
+    }
+    
+    /**
+     * Handle tap tempo input
+     */
+    handleTapTempo() {
+        const currentTime = Date.now();
+        this.tapTimes.push(currentTime);
+        this.tapCount++;
+        
+        // Keep only the last 4 taps
+        if (this.tapTimes.length > 4) {
+            this.tapTimes.shift();
+        }
+        
+        // Show tap tempo mode indicator
+        this.isTapTempoMode = true;
+        this.showTapTempoIndicator();
+        
+        // Calculate BPM if we have at least 2 taps
+        if (this.tapTimes.length >= 2) {
+            this.calculateSuggestedBpm();
+        }
+        
+        // Reset after 3 seconds of inactivity
+        clearTimeout(this.tapTempoTimeout);
+        this.tapTempoTimeout = setTimeout(() => {
+            this.resetTapTempo();
+        }, 3000);
+    }
+    
+    /**
+     * Calculate suggested BPM from tap intervals
+     */
+    calculateSuggestedBpm() {
+        if (this.tapTimes.length < 2) return;
+        
+        // Calculate average interval between taps
+        let totalInterval = 0;
+        for (let i = 1; i < this.tapTimes.length; i++) {
+            totalInterval += this.tapTimes[i] - this.tapTimes[i - 1];
+        }
+        
+        const averageInterval = totalInterval / (this.tapTimes.length - 1);
+        
+        // Convert milliseconds to BPM (60,000 ms per minute)
+        const calculatedBpm = Math.round(60000 / averageInterval);
+        
+        // Clamp BPM to valid range
+        this.suggestedBpm = Math.max(15, Math.min(200, calculatedBpm));
+        
+        // Update display
+        this.updateSuggestedBpmDisplay();
+    }
+    
+    /**
+     * Show tap tempo mode indicator
+     */
+    showTapTempoIndicator() {
+        if (this.elements.tapTempoIndicator) {
+            this.elements.tapTempoIndicator.style.display = 'block';
+            this.elements.tapTempoIndicator.textContent = `Tap Tempo: ${this.tapCount}/4`;
+        }
+    }
+    
+    /**
+     * Update suggested BPM display
+     */
+    updateSuggestedBpmDisplay() {
+        if (this.elements.suggestedBpmDisplay && this.suggestedBpm) {
+            this.elements.suggestedBpmDisplay.style.display = 'block';
+            this.elements.suggestedBpmDisplay.textContent = `Suggested: ${this.suggestedBpm} BPM (Press Enter to apply)`;
+        }
+    }
+    
+    /**
+     * Confirm and apply suggested BPM
+     */
+    confirmSuggestedBpm() {
+        if (this.suggestedBpm) {
+            // Apply the suggested BPM
+            this.setBpm(this.suggestedBpm);
+            
+            // Notify main app to apply the BPM change
+            if (this.callbacks.applyBpmChange) {
+                this.callbacks.applyBpmChange(this.suggestedBpm);
+            }
+            
+            // Reset tap tempo mode
+            this.resetTapTempo();
+        }
+    }
+    
+    /**
+     * Reset tap tempo mode
+     */
+    resetTapTempo() {
+        this.tapTimes = [];
+        this.tapCount = 0;
+        this.suggestedBpm = null;
+        this.isTapTempoMode = false;
+        
+        // Hide indicators
+        if (this.elements.tapTempoIndicator) {
+            this.elements.tapTempoIndicator.style.display = 'none';
+        }
+        if (this.elements.suggestedBpmDisplay) {
+            this.elements.suggestedBpmDisplay.style.display = 'none';
+        }
+        
+        // Clear timeout
+        if (this.tapTempoTimeout) {
+            clearTimeout(this.tapTempoTimeout);
+            this.tapTempoTimeout = null;
+        }
+    }
+    
+    /**
      * Reset UI to initial state
      */
     reset() {
@@ -676,5 +819,6 @@ class UIManager {
         this.setSoundType('Opening Loop');
         this.setEndingSoundType('Boom');
         this.updateStopButton(true);
+        this.resetTapTempo();
     }
 }

@@ -459,7 +459,9 @@ input[type="number"]:focus {
 .bpm-controls-section {
     margin: 1rem 0;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
 }
 
 .bpm-controls {
@@ -529,6 +531,50 @@ input[type="number"]:focus {
     border-color: #2f855a;
     transform: translateY(-2px);
     box-shadow: 0 8px 16px rgba(56, 161, 105, 0.3);
+}
+
+.tap-tempo-controls {
+    padding: 0.25rem 0.5rem;
+    background: rgba(102, 126, 234, 0.05);
+    border: 1px solid rgba(102, 126, 234, 0.15);
+    border-radius: 4px;
+    text-align: center;
+    min-height: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tap-tempo-indicator {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #667eea;
+    margin: 0.1rem 0;
+    padding: 0.2rem 0.4rem;
+    background: rgba(102, 126, 234, 0.15);
+    border-radius: 3px;
+    border: 1px solid rgba(102, 126, 234, 0.25);
+    display: inline-block;
+}
+
+.suggested-bpm-display {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #38a169;
+    margin: 0.1rem 0;
+    padding: 0.2rem 0.4rem;
+    background: rgba(56, 161, 105, 0.15);
+    border-radius: 3px;
+    border: 1px solid rgba(56, 161, 105, 0.25);
+    display: inline-block;
+}
+
+.tap-tempo-instructions {
+    font-size: 0.7rem;
+    color: #718096;
+    font-style: italic;
+    margin: 0;
+    line-height: 1.2;
 }
 
 .bpm-slider {
