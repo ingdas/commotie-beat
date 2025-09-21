@@ -4,16 +4,6 @@
  */
 class SoundConfig {
     constructor() {
-        // Configuration for oneshot button labels (can be customized)
-        this.oneshotLabels = {
-            'OneShot 1': 'Extra Suggestie',
-            'OneShot 2': 'Pose Suggestie', 
-            'OneShot 3': 'Blijdschap suggestie',
-            'OneShot 4': 'Vertel Verhaal',
-            'OneShot 5': 'Einde Stress',
-            'OneShot 6': 'Nudge Publiek'
-        };
-        
         this.sounds = [
             {
                 generator: 'scheduleKickDrumAudio',
@@ -62,32 +52,32 @@ class SoundConfig {
             },
             {
                 url: './sounds/oneshot1.mp3',
-                label: 'OneShot 1',
+                label: 'Extra Suggestie',
                 type: 'oneshot'
             },
             {
                 url: './sounds/oneshot2.mp3',
-                label: 'OneShot 2',
+                label: 'Pose Suggestie',
                 type: 'oneshot'
             },
             {
                 url: './sounds/oneshot3.mp3',
-                label: 'OneShot 3',
+                label: 'Blijdschap suggestie',
                 type: 'oneshot'
             },
             {
                 url: './sounds/oneshot4.mp3',
-                label: 'OneShot 4',
+                label: 'Vertel Verhaal',
                 type: 'oneshot'
             },
             {
                 url: './sounds/oneshot5.mp3',
-                label: 'OneShot 5',
+                label: 'Einde Stress',
                 type: 'oneshot'
             },
             {
                 url: './sounds/oneshot6.mp3',
-                label: 'OneShot 6',
+                label: 'Nudge Publiek',
                 type: 'oneshot'
             },
             {
@@ -216,26 +206,4 @@ class SoundConfig {
         return false;
     }
     
-    /**
-     * Get the display label for a oneshot sound
-     */
-    getOneshotLabel(soundLabel) {
-        return this.oneshotLabels[soundLabel] || soundLabel;
-    }
-    
-    /**
-     * Set a custom label for a oneshot sound
-     */
-    setOneshotLabel(soundLabel, customLabel) {
-        if (this.oneshotLabels.hasOwnProperty(soundLabel)) {
-            this.oneshotLabels[soundLabel] = customLabel;
-        }
-    }
-    
-    /**
-     * Get all oneshot labels configuration
-     */
-    getOneshotLabels() {
-        return { ...this.oneshotLabels };
-    }
 }

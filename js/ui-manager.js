@@ -96,7 +96,7 @@ class UIManager {
             if (soundConfig.type === 'end') {
                 button.textContent = soundConfig.label;
             } else if (soundConfig.type === 'oneshot') {
-                button.textContent = this.soundConfig.getOneshotLabel(soundConfig.label);
+                button.textContent = soundConfig.label;
             } else {
                 button.textContent = `${index + 1}. ${soundConfig.label}`;
             }
@@ -511,12 +511,6 @@ class UIManager {
         }
     }
     
-    /**
-     * Update oneshot button labels and regenerate buttons
-     */
-    updateOneshotLabels() {
-        this.generateSoundButtons();
-    }
     
     /**
      * Update display with countdown and BPM information
