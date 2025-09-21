@@ -130,6 +130,7 @@ class AudioManager {
         }
         
         // Schedule playback
+        console.log("playing audio buffer", scheduledTime);
         source.start(scheduledTime);
     }
     

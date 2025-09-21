@@ -23,7 +23,7 @@ class TimerManager {
         this.nextBeatTime = 0;
         this.beatInterval = 0;
         this.lastScheduledBeat = 0;
-        this.lookaheadTime = 0.5; // Schedule beats ahead (seconds)
+        this.lookaheadTime = 0.2; // Schedule beats ahead (seconds)
         
         // Timer interval for countdown display
         this.timerInterval = null;
@@ -270,23 +270,10 @@ class TimerManager {
     updateBpm(newBpm, selectedSound) {
         this.bpm = newBpm;
         
-        // Update the beat interval for MIDI-like scheduling
+        // Update the beat interval for new beats
         if (this.isRunning) {
-            const oldBeatInterval = this.beatInterval;
             this.beatInterval = 60 / this.bpm;
-            
-            // Clear scheduled beats to prevent duplicate audio when tempo changes
-            this.scheduledBeats = [];
-            this.scheduledVisualBeats = [];
-            
-            // Update nextBeatTime to maintain rhythm continuity
-            // Calculate how many beats have passed since the last scheduled beat
-            const currentTime = this.audioManager.getCurrentTime();
-            const timeSinceLastBeat = currentTime - (this.nextBeatTime - oldBeatInterval);
-            const beatsSinceLastBeat = Math.floor(timeSinceLastBeat / this.beatInterval);
-            
-            // Set nextBeatTime to the next beat in the new tempo
-            this.nextBeatTime = currentTime + (this.beatInterval - (timeSinceLastBeat % this.beatInterval));
+            // Let the existing schedulerLoop handle scheduling new beats at the new tempo
         }
         
         this.updateDisplay();
