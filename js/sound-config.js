@@ -6,11 +6,12 @@ class SoundConfig {
     constructor() {
         // Configuration for oneshot button labels (can be customized)
         this.oneshotLabels = {
-            'OneShot 1': 'Opening Suggestie',
+            'OneShot 1': 'Extra Suggestie',
             'OneShot 2': 'Pose Suggestie', 
             'OneShot 3': 'Blijdschap suggestie',
             'OneShot 4': 'Vertel Verhaal',
-            'OneShot 5': 'Einde Stress'
+            'OneShot 5': 'Einde Stress',
+            'OneShot 6': 'Nudge Publiek'
         };
         
         this.sounds = [
@@ -82,6 +83,11 @@ class SoundConfig {
             {
                 url: './sounds/oneshot5.mp3',
                 label: 'OneShot 5',
+                type: 'oneshot'
+            },
+            {
+                url: './sounds/oneshot6.mp3',
+                label: 'OneShot 6',
                 type: 'oneshot'
             },
             {
