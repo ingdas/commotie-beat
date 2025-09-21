@@ -681,7 +681,7 @@ class UIManager {
     }
     
     /**
-     * Handle keyboard input for tap tempo
+     * Handle keyboard input for tap tempo and stop/resume
      */
     handleKeyDown(e) {
         // Handle Shift key for tap tempo
@@ -692,6 +692,12 @@ class UIManager {
         // Handle Enter key to confirm suggested BPM
         if (e.key === 'Enter' && this.isTapTempoMode && this.suggestedBpm) {
             this.confirmSuggestedBpm();
+        }
+        
+        // Handle Spacebar to toggle stop/resume
+        if (e.key === ' ' && !e.repeat) {
+            e.preventDefault(); // Prevent page scroll
+            this.callbacks.toggleStopResume();
         }
     }
     
