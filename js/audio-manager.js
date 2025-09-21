@@ -10,6 +10,7 @@ class AudioManager {
         this.soundAlternationCounters = {};
         this.volume = 50; // Default volume 50%
         this.audioInitialized = false; // Track if audio has been initialized
+        this.activeOneshotSources = []; // Track active oneshot audio sources for stopping
         
         this.initializeAudio();
     }
@@ -101,7 +102,7 @@ class AudioManager {
     /**
      * Play an audio buffer at a scheduled time
      */
-    playAudioBuffer(audioBuffer, scheduledTime) {
+    playAudioBuffer(audioBuffer, scheduledTime, isOneshot = false) {
         if (!audioBuffer || !this.audioContext) return;
         
         const source = this.audioContext.createBufferSource();
@@ -114,6 +115,19 @@ class AudioManager {
         // Apply volume control
         const volumeMultiplier = this.volume / 100;
         gainNode.gain.setValueAtTime(volumeMultiplier, scheduledTime);
+        
+        // Track oneshot sources for stopping
+        if (isOneshot) {
+            this.activeOneshotSources.push(source);
+            
+            // Remove from tracking when the sound ends
+            source.onended = () => {
+                const index = this.activeOneshotSources.indexOf(source);
+                if (index > -1) {
+                    this.activeOneshotSources.splice(index, 1);
+                }
+            };
+        }
         
         // Schedule playback
         source.start(scheduledTime);
@@ -383,7 +397,7 @@ class AudioManager {
         if (soundConfig.url) {
             // Single URL-based sound: try to use loaded audio buffer first
             if (this.audioBuffers[selectedOneshotSound]) {
-                this.playAudioBuffer(this.audioBuffers[selectedOneshotSound], scheduledTime);
+                this.playAudioBuffer(this.audioBuffers[selectedOneshotSound], scheduledTime, true);
             } else {
                 console.warn(`Audio buffer not loaded for oneshot sound: ${selectedOneshotSound}`);
             }
@@ -391,7 +405,7 @@ class AudioManager {
             // Multiple URL-based sound: use first available buffer
             if (this.audioBuffers[selectedOneshotSound] && this.audioBuffers[selectedOneshotSound].length > 0) {
                 const currentBuffer = this.audioBuffers[selectedOneshotSound][0];
-                this.playAudioBuffer(currentBuffer, scheduledTime);
+                this.playAudioBuffer(currentBuffer, scheduledTime, true);
             } else {
                 console.warn(`Audio buffers not loaded for oneshot sound: ${selectedOneshotSound}`);
             }
@@ -399,6 +413,24 @@ class AudioManager {
             // Function-based sound: use the generator function
             this[soundConfig.generator](scheduledTime);
         }
+    }
+    
+    /**
+     * Stop all currently playing oneshot sounds
+     */
+    stopAllOneshotSounds() {
+        // Stop all active oneshot sources
+        this.activeOneshotSources.forEach(source => {
+            try {
+                source.stop();
+            } catch (error) {
+                // Source might already be stopped, ignore error
+                console.warn('Error stopping oneshot source:', error);
+            }
+        });
+        
+        // Clear the array
+        this.activeOneshotSources = [];
     }
     
     /**

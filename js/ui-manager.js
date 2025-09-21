@@ -64,7 +64,10 @@ class UIManager {
             // MIDI status elements
             midiStatus: document.getElementById('midiStatus'),
             midiIndicator: document.getElementById('midiIndicator'),
-            midiText: document.getElementById('midiText')
+            midiText: document.getElementById('midiText'),
+            
+            // Oneshot stop button
+            stopOneshotBtn: document.getElementById('stopOneshotBtn')
         };
         
         // Sound buttons will be generated dynamically
@@ -216,6 +219,11 @@ class UIManager {
         // BPM preset buttons
         this.elements.set60BpmBtn.addEventListener('click', () => this.callbacks.set60Bpm());
         this.elements.set110BpmBtn.addEventListener('click', () => this.callbacks.set110Bpm());
+        
+        // Oneshot stop button
+        if (this.elements.stopOneshotBtn) {
+            this.elements.stopOneshotBtn.addEventListener('click', () => this.callbacks.onOneshotSoundStop());
+        }
     }
     
     /**

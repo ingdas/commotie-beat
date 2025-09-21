@@ -303,6 +303,7 @@ class BeatCountdownTimer {
             onSoundTypeChanged: (soundType) => this.onSoundTypeChanged(soundType),
             onEndingSoundTypeChanged: (soundType) => this.onEndingSoundTypeChanged(soundType),
             onOneshotSoundPlay: (soundType) => this.onOneshotSoundPlay(soundType),
+            onOneshotSoundStop: () => this.onOneshotSoundStop(),
             onComboSoundPlay: (soundType, bpm) => this.onComboSoundPlay(soundType, bpm),
             onVolumeChanged: (volume) => this.onVolumeChanged(volume)
         };
@@ -511,6 +512,14 @@ class BeatCountdownTimer {
     onOneshotSoundPlay(soundType) {
         // Play the oneshot sound immediately
         this.audioManager.playOneshotSound(soundType);
+    }
+    
+    /**
+     * Handle stopping all oneshot sounds
+     */
+    onOneshotSoundStop() {
+        // Stop all currently playing oneshot sounds
+        this.audioManager.stopAllOneshotSounds();
     }
     
     /**

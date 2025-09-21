@@ -368,6 +368,27 @@ input[type="number"]:focus {
     border-color: #fcb69f;
 }
 
+.oneshot-stop-btn {
+    padding: 0.5rem 1rem;
+    border: 2px solid #e53e3e;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+    color: #c53030;
+    margin-top: 0.5rem;
+    width: 100%;
+}
+
+.oneshot-stop-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(229, 62, 62, 0.4);
+    background: linear-gradient(135deg, #feb2b2 0%, #fed7d7 100%);
+    border-color: #e53e3e;
+}
+
 .combo-btn {
     padding: 0.5rem 1rem;
     border: 2px solid #e2e8f0;
