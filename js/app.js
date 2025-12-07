@@ -117,7 +117,7 @@ class BeatCountdownTimer {
         this.stopAllOpeningSounds();
         
         // Create new audio object and store reference
-        this.openingSoundAudio = new Audio('./sounds/open1.mp3');
+        this.openingSoundAudio = new Audio('./sounds/open1-halve.mp3');
         this.openingSoundAudio.volume = 1;
         
         this.openingSoundAudio.play().catch(error => {
@@ -133,7 +133,7 @@ class BeatCountdownTimer {
         this.stopAllOpeningSounds();
         
         // Create new audio object and store reference
-        this.openingSound2Audio = new Audio('./sounds/open2.mp3');
+        this.openingSound2Audio = new Audio('./sounds/open2-halve.mp3');
         this.openingSound2Audio.volume = 1;
         
         this.openingSound2Audio.play().catch(error => {
